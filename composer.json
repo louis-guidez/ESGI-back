@@ -17,6 +17,7 @@
         "symfony/flex": "^2.6",
         "symfony/framework-bundle": "7.2.*",
         "symfony/runtime": "7.2.*",
+        "symfony/security-bundle": "7.2.*",
         "symfony/yaml": "7.2.*"
     },
     "config": {
@@ -68,5 +69,8 @@
             "allow-contrib": false,
             "require": "7.2.*"
         }
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.63"
     }
 }
