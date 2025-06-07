@@ -2,7 +2,10 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Message;
 use App\Repository\MessageRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -24,5 +27,46 @@ class MessageController extends AbstractController
         }
 
         return $this->json($data);
+    }
+
+    #[Route('/api/messages', name: 'api_messages_new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $message = new Message();
+        $message->setContenu($data['contenu'] ?? null);
+        if (isset($data['dateEnvoi'])) {
+            $message->setDateEnvoi(new \DateTime($data['dateEnvoi']));
+        }
+
+        $entityManager->persist($message);
+        $entityManager->flush();
+
+        return $this->json(['id' => $message->getId()], 201);
+    }
+
+    #[Route('/api/messages/{id}', name: 'api_messages_edit', methods: ['PUT'])]
+    public function edit(Request $request, EntityManagerInterface $entityManager, Message $message): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $message->setContenu($data['contenu'] ?? $message->getContenu());
+        if (isset($data['dateEnvoi'])) {
+            $message->setDateEnvoi(new \DateTime($data['dateEnvoi']));
+        }
+
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Message updated']);
+    }
+
+    #[Route('/api/messages/{id}', name: 'api_messages_delete', methods: ['DELETE'])]
+    public function delete(EntityManagerInterface $entityManager, Message $message): JsonResponse
+    {
+        $entityManager->remove($message);
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Message deleted']);
     }
 }

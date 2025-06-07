@@ -2,7 +2,10 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Reservation;
 use App\Repository\ReservationRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,5 +28,52 @@ class ReservationController extends AbstractController
         }
 
         return $this->json($data);
+    }
+
+    #[Route('/api/reservations', name: 'api_reservations_new', methods: ['POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $reservation = new Reservation();
+        if (isset($data['dateDebut'])) {
+            $reservation->setDateDebut(new \DateTime($data['dateDebut']));
+        }
+        if (isset($data['dateFin'])) {
+            $reservation->setDateFin(new \DateTime($data['dateFin']));
+        }
+        $reservation->setStatut($data['statut'] ?? null);
+
+        $entityManager->persist($reservation);
+        $entityManager->flush();
+
+        return $this->json(['id' => $reservation->getId()], 201);
+    }
+
+    #[Route('/api/reservations/{id}', name: 'api_reservations_edit', methods: ['PUT'])]
+    public function edit(Request $request, EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (isset($data['dateDebut'])) {
+            $reservation->setDateDebut(new \DateTime($data['dateDebut']));
+        }
+        if (isset($data['dateFin'])) {
+            $reservation->setDateFin(new \DateTime($data['dateFin']));
+        }
+        $reservation->setStatut($data['statut'] ?? $reservation->getStatut());
+
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Reservation updated']);
+    }
+
+    #[Route('/api/reservations/{id}', name: 'api_reservations_delete', methods: ['DELETE'])]
+    public function delete(EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
+    {
+        $entityManager->remove($reservation);
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Reservation deleted']);
     }
 }
