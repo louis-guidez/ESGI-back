@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Annonce;
+use App\Entity\Photo;
 use App\Repository\AnnonceRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,6 +20,11 @@ class AnnonceController extends AbstractController
 
         $data = [];
         foreach ($annonces as $annonce) {
+            $photos = [];
+            foreach ($annonce->getPhotos() as $photo) {
+                $photos[] = $photo->getUrlChemin();
+            }
+
             $data[] = [
                 'id' => $annonce->getId(),
                 'titre' => $annonce->getTitre(),
@@ -26,6 +32,7 @@ class AnnonceController extends AbstractController
                 'prix' => $annonce->getPrix(),
                 'statut' => $annonce->getStatut(),
                 'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
+                'photos' => $photos,
             ];
         }
 
@@ -46,10 +53,31 @@ class AnnonceController extends AbstractController
             $annonce->setDateCreation(new \DateTime($data['dateCreation']));
         }
 
+        if (isset($data['photos']) && is_array($data['photos'])) {
+            foreach ($data['photos'] as $photoData) {
+                $photo = new Photo();
+                $photo->setUrlChemin($photoData['urlChemin'] ?? null);
+                if (isset($photoData['dateUpload'])) {
+                    $photo->setDateUpload(new \DateTime($photoData['dateUpload']));
+                }
+                $photo->setAnnonce($annonce);
+                $entityManager->persist($photo);
+                $annonce->addPhoto($photo);
+            }
+        }
+
         $entityManager->persist($annonce);
         $entityManager->flush();
 
-        return $this->json(['id' => $annonce->getId()], 201);
+        $photoUrls = [];
+        foreach ($annonce->getPhotos() as $photo) {
+            $photoUrls[] = $photo->getUrlChemin();
+        }
+
+        return $this->json([
+            'id' => $annonce->getId(),
+            'photos' => $photoUrls,
+        ], 201);
     }
 
     #[Route('/api/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]

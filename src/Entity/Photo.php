@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PhotoRepository;
+use App\Entity\Annonce;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PhotoRepository::class)]
@@ -18,6 +19,9 @@ class Photo
 
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateUpload = null;
+
+    #[ORM\ManyToOne(inversedBy: 'photos')]
+    private ?Annonce $annonce = null;
 
     public function getId(): ?int
     {
@@ -44,6 +48,18 @@ class Photo
     public function setDateUpload(?\DateTime $dateUpload): static
     {
         $this->dateUpload = $dateUpload;
+
+        return $this;
+    }
+
+    public function getAnnonce(): ?Annonce
+    {
+        return $this->annonce;
+    }
+
+    public function setAnnonce(?Annonce $annonce): static
+    {
+        $this->annonce = $annonce;
 
         return $this;
     }
