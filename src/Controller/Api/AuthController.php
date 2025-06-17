@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AuthController extends AbstractController
 {
-    #[Route('/register', name: 'api_register', methods: ['POST'])]
+    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     public function register(
         Request $request,
         EntityManagerInterface $entityManager,
@@ -56,7 +56,7 @@ class AuthController extends AbstractController
         return $this->json(['id' => $utilisateur->getId()], 201);
     }
 
-    #[Route('/login', name: 'api_login', methods: ['POST'])]
+    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(
         Request $request,
         UtilisateurRepository $utilisateurRepository,
