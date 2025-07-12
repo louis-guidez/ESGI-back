@@ -1,0 +1,9 @@
+vich_uploader:
+    db_driver: orm
+    storage: flysystem
+
+    mappings:
+        fichier:
+            uri_prefix: /fichier
+            upload_destination: aws.storage
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer

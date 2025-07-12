@@ -6,6 +6,8 @@ use App\Entity\Annonce;
 use App\Entity\Photo;
 use App\Repository\AnnonceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,15 +16,16 @@ use Symfony\Component\Routing\Annotation\Route;
 class AnnonceController extends AbstractController
 {
     #[Route('/api/annonces', name: 'api_annonces', methods: ['GET'])]
-    public function index(AnnonceRepository $annonceRepository): JsonResponse
+    public function index(AnnonceRepository $annonceRepository, ParameterBagInterface $params): JsonResponse
     {
         $annonces = $annonceRepository->findAll();
+        $endpoint = rtrim($params->get('rustfs_endpoint'), '/'); // évite les //
 
         $data = [];
         foreach ($annonces as $annonce) {
             $photos = [];
             foreach ($annonce->getPhotos() as $photo) {
-                $photos[] = $photo->getUrlChemin();
+                $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
             }
 
             $data[] = [
@@ -42,24 +45,24 @@ class AnnonceController extends AbstractController
     #[Route('/api/annonces', name: 'api_annonces_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
         $annonce = new Annonce();
-        $annonce->setTitre($data['titre'] ?? null);
-        $annonce->setDescription($data['description'] ?? null);
-        $annonce->setPrix($data['prix'] ?? null);
-        $annonce->setStatut($data['statut'] ?? null);
-        if (isset($data['dateCreation'])) {
-            $annonce->setDateCreation(new \DateTime($data['dateCreation']));
+        $annonce->setTitre($request->request->get('titre'));
+        $annonce->setDescription($request->request->get('description'));
+        $annonce->setPrix($request->request->get('prix'));
+        $annonce->setStatut($request->request->get('statut'));
+
+        if ($request->request->get('dateCreation')) {
+            $annonce->setDateCreation(new \DateTime($request->request->get('dateCreation')));
         }
 
-        if (isset($data['photos']) && is_array($data['photos'])) {
-            foreach ($data['photos'] as $photoData) {
+        /** @var UploadedFile[] $files */
+        $files = $request->files->get('photos');
+
+        if ($files && is_array($files)) {
+            foreach ($files as $file) {
                 $photo = new Photo();
-                $photo->setUrlChemin($photoData['urlChemin'] ?? null);
-                if (isset($photoData['dateUpload'])) {
-                    $photo->setDateUpload(new \DateTime($photoData['dateUpload']));
-                }
+                $photo->setImageFile($file); // VichUploader gère urlChemin
+                $photo->setDateUpload(new \DateTime());
                 $photo->setAnnonce($annonce);
                 $entityManager->persist($photo);
                 $annonce->addPhoto($photo);
@@ -71,7 +74,7 @@ class AnnonceController extends AbstractController
 
         $photoUrls = [];
         foreach ($annonce->getPhotos() as $photo) {
-            $photoUrls[] = $photo->getUrlChemin();
+            $photoUrls[] = $photo->getImageFile();
         }
 
         return $this->json([

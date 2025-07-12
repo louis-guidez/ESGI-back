@@ -5,8 +5,11 @@ namespace App\Entity;
 use App\Repository\PhotoRepository;
 use App\Entity\Annonce;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: PhotoRepository::class)]
+#[Vich\Uploadable]
 class Photo
 {
     #[ORM\Id]
@@ -14,30 +17,45 @@ class Photo
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $urlChemin = null;
-
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateUpload = null;
 
     #[ORM\ManyToOne(inversedBy: 'photos')]
     private ?Annonce $annonce = null;
 
+    #[Vich\UploadableField(mapping: 'fichier', fileNameProperty: 'imageName')]
+    private ?File $imageFile = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $imageName = null;
+
+    public function setImageFile(?File $imageFile = null): void
+    {
+        $this->imageFile = $imageFile;
+
+        if ($imageFile !== null) {
+            $this->dateUpload = new \DateTime();
+        }
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageName(?string $imageName): void
+    {
+        $this->imageName = $imageName;
+    }
+
+    public function getImageName(): ?string
+    {
+        return $this->imageName;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUrlChemin(): ?string
-    {
-        return $this->urlChemin;
-    }
-
-    public function setUrlChemin(?string $urlChemin): static
-    {
-        $this->urlChemin = $urlChemin;
-
-        return $this;
     }
 
     public function getDateUpload(): ?\DateTime
