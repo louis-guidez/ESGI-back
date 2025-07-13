@@ -2,11 +2,7 @@ services:
 
   back:
     container_name: ESGI-pa-back
-   # image: ghcr.io/louis-guidez/esgi-pa-back
-    build:
-      context: .
-      dockerfile: docker/prod/Dockerfile
-      target: prod
+    image: ghcr.io/louis-guidez/esgi-pa-back
     environment:
       APP_ENV: prod
       APP_DEBUG: 0
