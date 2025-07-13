@@ -5,9 +5,19 @@ services:
     image: ghcr.io/louis-guidez/esgi-pa-back
     environment:
       APP_ENV: prod
+      APP_SECRET: ${APP_SECRET}
       APP_DEBUG: 0
-      DATABASE_URL: ${DATABASE_URL}
+      ENDPOINT_RUSTFS: ${ENDPOINT_RUSTFS}
+      ENDPOINT_RUSTFS_NAV: ${ENDPOINT_RUSTFS_NAV}
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_HOST: ${MYSQL_HOST}
+      DATABASE_URL: ${DATABASE_URL}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
     restart: always
     command: >
       sh -c "php bin/console cache:clear --env=prod &&
