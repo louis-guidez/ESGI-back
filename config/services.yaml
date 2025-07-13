@@ -4,6 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    photos_directory: '%kernel.project_dir%/public/uploads/photos'
+    rustfs_endpoint: '%env(ENDPOINT_RUSTFS_NAV)%'
 
 services:
     # default configuration for services in *this* file
@@ -22,3 +24,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    Aws\S3\S3Client:
+        arguments:
+            - version: 'latest'
+              region: 'eu-east-1'
+              endpoint: '%env(ENDPOINT_RUSTFS)%'
+              use_path_style_endpoint: true
+              credentials:
+                  key: '%env(RUSTFS_ACCESS_KEY)%'
+                  secret: '%env(RUSTFS_SECRET_KEY)%'

@@ -11,13 +11,22 @@
         "doctrine/doctrine-bundle": "^2.14",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
+        "guzzlehttp/guzzle": "^7.9",
+        "league/flysystem-aws-s3-v3": "^3.29",
+        "league/flysystem-bundle": "^3.4",
         "nelmio/cors-bundle": "^2.5",
+        "stripe/stripe-php": "^17.4",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2.6",
         "symfony/framework-bundle": "7.2.*",
+        "symfony/http-client": "7.2.*",
+        "symfony/mime": "7.2.*",
         "symfony/runtime": "7.2.*",
-        "symfony/yaml": "7.2.*"
+        "symfony/security-bundle": "7.2.*",
+        "symfony/translation": "7.2.*",
+        "symfony/yaml": "7.2.*",
+        "vich/uploader-bundle": "^2.7"
     },
     "config": {
         "allow-plugins": {
@@ -68,5 +77,8 @@
             "allow-contrib": false,
             "require": "7.2.*"
         }
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.63"
     }
 }
