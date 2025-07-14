@@ -44,6 +44,27 @@ class UtilisateurController extends AbstractController
 
     #[OA\Post(path: '/api/utilisateurs', summary: 'Create utilisateur')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            type: 'object',
+            required: ['email', 'password'],
+            properties: [
+                new OA\Property(property: 'email', type: 'string'),
+                new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+                new OA\Property(property: 'password', type: 'string'),
+                new OA\Property(property: 'nom', type: 'string'),
+                new OA\Property(property: 'prenom', type: 'string'),
+                new OA\Property(property: 'dateInscription', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'cagnotte', type: 'number', format: 'float'),
+                new OA\Property(property: 'emailIsVerified', type: 'boolean'),
+                new OA\Property(property: 'adresse', type: 'string'),
+                new OA\Property(property: 'postalCode', type: 'string'),
+                new OA\Property(property: 'ville', type: 'string'),
+                new OA\Property(property: 'pays', type: 'string')
+            ]
+        )
+    )]
     #[Route('/api/utilisateurs', name: 'api_utilisateurs_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -73,6 +94,25 @@ class UtilisateurController extends AbstractController
 
     #[OA\Put(path: '/api/utilisateurs/{id}', summary: 'Edit utilisateur')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'email', type: 'string'),
+                new OA\Property(property: 'roles', type: 'array', items: new OA\Items(type: 'string')),
+                new OA\Property(property: 'password', type: 'string'),
+                new OA\Property(property: 'nom', type: 'string'),
+                new OA\Property(property: 'prenom', type: 'string'),
+                new OA\Property(property: 'dateInscription', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'cagnotte', type: 'number', format: 'float'),
+                new OA\Property(property: 'emailIsVerified', type: 'boolean'),
+                new OA\Property(property: 'adresse', type: 'string'),
+                new OA\Property(property: 'postalCode', type: 'string'),
+                new OA\Property(property: 'ville', type: 'string'),
+                new OA\Property(property: 'pays', type: 'string')
+            ]
+        )
+    )]
     #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse
     {

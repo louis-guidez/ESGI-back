@@ -35,6 +35,15 @@ class UtilisateurConversationController extends AbstractController
 
     #[OA\Post(path: '/api/utilisateur-conversations', summary: 'Create utilisateur conversation')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'utilisateurId', type: 'integer'),
+                new OA\Property(property: 'conversationId', type: 'integer')
+            ]
+        )
+    )]
     #[Route('/api/utilisateur-conversations', name: 'api_utilisateur_conversations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {

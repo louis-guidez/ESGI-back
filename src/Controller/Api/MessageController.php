@@ -35,6 +35,15 @@ class MessageController extends AbstractController
 
     #[OA\Post(path: '/api/messages', summary: 'Create message')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'contenu', type: 'string'),
+                new OA\Property(property: 'dateEnvoi', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/messages', name: 'api_messages_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -54,6 +63,15 @@ class MessageController extends AbstractController
 
     #[OA\Put(path: '/api/messages/{id}', summary: 'Edit message')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'contenu', type: 'string'),
+                new OA\Property(property: 'dateEnvoi', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/messages/{id}', name: 'api_messages_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Message $message): JsonResponse
     {

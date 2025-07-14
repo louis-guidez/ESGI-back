@@ -36,6 +36,16 @@ class ReservationController extends AbstractController
 
     #[OA\Post(path: '/api/reservations', summary: 'Create reservation')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'dateDebut', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'dateFin', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'statut', type: 'string')
+            ]
+        )
+    )]
     #[Route('/api/reservations', name: 'api_reservations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -58,6 +68,16 @@ class ReservationController extends AbstractController
 
     #[OA\Put(path: '/api/reservations/{id}', summary: 'Edit reservation')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'dateDebut', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'dateFin', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'statut', type: 'string')
+            ]
+        )
+    )]
     #[Route('/api/reservations/{id}', name: 'api_reservations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
     {

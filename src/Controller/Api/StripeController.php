@@ -15,6 +15,14 @@ class StripeController extends AbstractController
 {
     #[OA\Post(path: '/api/create-payment-intent', summary: 'Create payment intent')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'amount', type: 'integer')
+            ]
+        )
+    )]
     #[Route('/api/create-payment-intent', name: 'create_payment_intent', methods: ['POST'])]
     public function createPaymentIntent(Request $request): JsonResponse
     {
