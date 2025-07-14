@@ -1,6 +1,18 @@
-version: '3.8'
-
 services:
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    restart: always
 
   php:
     build:
@@ -13,13 +25,16 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - minio
     environment:
       APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
       APP_SECRET: ${APP_SECRET}
-      ENDPOINT_RUSTF: ${ENDPOINT_RUSTF}
-      ENDPOINT_RUSTFS_NAV: ${ENDPOINT_RUSTFS_NAV}
-      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
-      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+      ENDPOINT_MINIO: ${ENDPOINT_MINIO}
+      ENDPOINT_MINIO_NAV: ${ENDPOINT_MINIO_NAV}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -28,7 +43,9 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
       MAILER_DSN: ${MAILER_DSN}
-    command: php -S 0.0.0.0:8000 -t public
+    command: >
+      sh -c "sh docker/prod/init-minio.sh &&
+             php -S 0.0.0.0:8000 -t public"
 
   db:
     image: mysql:8.0
@@ -43,20 +60,6 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/prod/init.sql:/docker-entrypoint-initdb.d/init.sql
 
-  rustfs:
-    image: rustfs/rustfs
-    container_name: rustfs
-    ports:
-      - "9000:9000"  # port d'API de RustFS
-    volumes:
-      - rustfs_data:/data
-    environment:
-      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
-      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
-      RUSTFS_STORAGE_DIR: /data
-      RUSTFS_API_PORT: 9000
-
-
 volumes:
   db_data:
-  rustfs_data:
+  minio_data:
