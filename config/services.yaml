@@ -5,7 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     photos_directory: '%kernel.project_dir%/public/uploads/photos'
-    rustfs_endpoint: '%env(ENDPOINT_RUSTFS_NAV)%'
+    minio_endpoint: '%env(ENDPOINT_MINIO_NAV)%'
 
 services:
     # default configuration for services in *this* file
@@ -28,8 +28,8 @@ services:
         arguments:
             - version: 'latest'
               region: 'eu-east-1'
-              endpoint: '%env(ENDPOINT_RUSTFS)%'
+              endpoint: '%env(ENDPOINT_MINIO)%'
               use_path_style_endpoint: true
               credentials:
-                  key: '%env(RUSTFS_ACCESS_KEY)%'
-                  secret: '%env(RUSTFS_SECRET_KEY)%'
+                  key: '%env(MINIO_ACCESS_KEY)%'
+                  secret: '%env(MINIO_SECRET_KEY)%'

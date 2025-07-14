@@ -28,6 +28,11 @@ RUN git config --global --add safe.directory /var/www/html
 # Install PHP dependencies without dev + no auto-scripts
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
+# Installer mc (client MinIO)
+RUN curl -O https://dl.min.io/client/mc/release/linux-amd64/mc \
+    && chmod +x mc \
+    && mv mc /usr/local/bin/mc
+
 # ─────────────── STAGE 3 : final image ───────────────
 FROM base AS prod
 

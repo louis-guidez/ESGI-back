@@ -19,7 +19,7 @@ class AnnonceController extends AbstractController
     public function index(AnnonceRepository $annonceRepository, ParameterBagInterface $params): JsonResponse
     {
         $annonces = $annonceRepository->findAll();
-        $endpoint = rtrim($params->get('rustfs_endpoint'), '/'); // évite les //
+        $endpoint = rtrim($params->get('minio_endpoint'), '/'); // évite les //
 
         $data = [];
         foreach ($annonces as $annonce) {
@@ -74,7 +74,7 @@ class AnnonceController extends AbstractController
 
         $photoUrls = [];
         foreach ($annonce->getPhotos() as $photo) {
-            $photoUrls[] = $photo->getImageFile();
+            $photoUrls[] = $photo->getImageName();
         }
 
         return $this->json([

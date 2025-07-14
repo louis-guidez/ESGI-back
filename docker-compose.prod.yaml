@@ -10,29 +10,50 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/prod/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    restart: always
+
   back:
     container_name: ESGI-pa-back
-    image: ghcr.io/louis-guidez/esgi-pa-back
+    # image: ghcr.io/louis-guidez/esgi-pa-back
+    build:
+      context: .
+      dockerfile: docker/prod/Dockerfile
+      target: prod
     environment:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET}
       APP_DEBUG: 0
-      ENDPOINT_RUSTFS: ${ENDPOINT_RUSTFS}
-      ENDPOINT_RUSTFS_NAV: ${ENDPOINT_RUSTFS_NAV}
-      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
-      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+      ENDPOINT_MINIO: ${ENDPOINT_MINIO}
+      ENDPOINT_MINIO_NAV: ${ENDPOINT_MINIO_NAV}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_HOST: ${MYSQL_HOST}
       DATABASE_URL: ${DATABASE_URL}
+      MAILER_DSN: ${MAILER_DSN}
       CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
     depends_on:
       - db
+      - minio
     restart: always
     command: >
-      sh -c "php bin/console cache:clear --env=prod &&
+      sh -c "sh docker/prod/init-minio.sh && php bin/console cache:clear --env=prod &&
              php bin/console cache:warmup --env=prod &&
              php-fpm"
 
@@ -45,20 +66,6 @@ services:
       - back
     restart: always
 
-  rustfs:
-    image: rustfs/rustfs
-    container_name: rustfs
-    ports:
-      - "9000:9000"
-    volumes:
-      - rustfs_data:/data
-    environment:
-      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
-      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
-      RUSTFS_STORAGE_DIR: /data
-      RUSTFS_API_PORT: 9000
-    restart: always
-
 volumes:
   db_data:
-  rustfs_data:
+  minio_data:
