@@ -31,5 +31,5 @@ services:
               endpoint: '%env(ENDPOINT_MINIO)%'
               use_path_style_endpoint: true
               credentials:
-                  key: '%env(MINIO_ACCESS_KEY)%'
-                  secret: '%env(MINIO_SECRET_KEY)%'
+                  key: '%env(MINIO_ROOT_USER)%'
+                  secret: '%env(MINIO_ROOT_PASSWORD)%'
