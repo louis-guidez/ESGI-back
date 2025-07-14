@@ -26,11 +26,7 @@ services:
 
   back:
     container_name: ESGI-pa-back
-    # image: ghcr.io/louis-guidez/esgi-pa-back
-    build:
-      context: .
-      dockerfile: docker/prod/Dockerfile
-      target: prod
+    image: ghcr.io/louis-guidez/esgi-pa-back
     environment:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET}
@@ -53,8 +49,7 @@ services:
       - minio
     restart: always
     command: >
-      sh -c "sh docker/prod/init-minio.sh && php bin/console cache:clear --env=prod &&
-             php bin/console cache:warmup --env=prod &&
+      sh -c "php bin/console cache:warmup --env=prod &&
              php-fpm"
 
   nginx:
