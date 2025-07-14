@@ -66,7 +66,7 @@ services:
       - init-minio
     restart: always
     command: >
-      sh -c "chown -R www-data:www-data . && php bin/console cache:warmup --env=prod &&
+      sh -c "chown -R www-data:www-data var && php bin/console cache:warmup --env=prod &&
              php-fpm"
 
   nginx:
