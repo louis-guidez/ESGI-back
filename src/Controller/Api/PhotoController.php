@@ -38,6 +38,15 @@ class PhotoController extends AbstractController
 
     #[OA\Post(path: '/api/photos', summary: 'Create photo')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'urlChemin', type: 'string'),
+                new OA\Property(property: 'dateUpload', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/photos', name: 'api_photos_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -57,6 +66,15 @@ class PhotoController extends AbstractController
 
     #[OA\Put(path: '/api/photos/{id}', summary: 'Edit photo')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'urlChemin', type: 'string'),
+                new OA\Property(property: 'dateUpload', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/photos/{id}', name: 'api_photos_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Photo $photo): JsonResponse
     {

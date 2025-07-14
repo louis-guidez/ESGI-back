@@ -48,6 +48,27 @@ class AnnonceController extends AbstractController
 
     #[OA\Post(path: '/api/annonces', summary: 'Create annonce')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\MediaType(
+            mediaType: 'multipart/form-data',
+            schema: new OA\Schema(
+                type: 'object',
+                properties: [
+                    new OA\Property(property: 'titre', type: 'string'),
+                    new OA\Property(property: 'description', type: 'string'),
+                    new OA\Property(property: 'prix', type: 'number', format: 'float'),
+                    new OA\Property(property: 'statut', type: 'string'),
+                    new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time'),
+                    new OA\Property(
+                        property: 'photos',
+                        type: 'array',
+                        items: new OA\Items(type: 'string', format: 'binary')
+                    )
+                ]
+            )
+        )
+    )]
     #[Route('/api/annonces', name: 'api_annonces_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -93,6 +114,19 @@ class AnnonceController extends AbstractController
 
     #[OA\Put(path: '/api/annonces/{id}', summary: 'Edit annonce')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        required: true,
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'titre', type: 'string'),
+                new OA\Property(property: 'description', type: 'string'),
+                new OA\Property(property: 'prix', type: 'number', format: 'float'),
+                new OA\Property(property: 'statut', type: 'string'),
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {

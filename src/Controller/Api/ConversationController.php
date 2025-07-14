@@ -34,6 +34,14 @@ class ConversationController extends AbstractController
 
     #[OA\Post(path: '/api/conversations', summary: 'Create conversation')]
     #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/conversations', name: 'api_conversations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -52,6 +60,14 @@ class ConversationController extends AbstractController
 
     #[OA\Put(path: '/api/conversations/{id}', summary: 'Edit conversation')]
     #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
     #[Route('/api/conversations/{id}', name: 'api_conversations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
