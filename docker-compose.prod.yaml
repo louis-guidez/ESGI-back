@@ -65,9 +65,6 @@ services:
       - minio
       - init-minio
     restart: always
-    command: >
-      sh -c "php bin/console cache:warmup --env=prod &&
-             php-fpm && chown -R www-data:www-data var"
 
   nginx:
     image: ghcr.io/louis-guidez/esgi-pa-back-nginx
