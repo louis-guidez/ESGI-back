@@ -14,8 +14,10 @@
         "guzzlehttp/guzzle": "^7.9",
         "league/flysystem-aws-s3-v3": "^3.29",
         "league/flysystem-bundle": "^3.4",
+        "nelmio/api-doc-bundle": "^5.4",
         "nelmio/cors-bundle": "^2.5",
         "stripe/stripe-php": "^17.4",
+        "symfony/asset": "7.2.*",
         "symfony/console": "7.2.*",
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2.6",
@@ -26,7 +28,10 @@
         "symfony/runtime": "7.2.*",
         "symfony/security-bundle": "7.2.*",
         "symfony/translation": "7.2.*",
+        "symfony/twig-bundle": "7.2.*",
         "symfony/yaml": "7.2.*",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/twig": "^2.12|^3.0",
         "vich/uploader-bundle": "^2.7"
     },
     "config": {
