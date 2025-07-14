@@ -7,10 +7,10 @@ echo "🚀 Initialisation de MinIO..."
 # ✅ Installer mc correctement si absent
 if ! command -v mc >/dev/null 2>&1; then
   echo "📥 Installation du client mc..."
-  curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc -o /usr/local/bin/mc
-  chmod +x /usr/local/bin/mc
+# Pour les machines ARM64 (Coolify)
+curl -sSL https://dl.min.io/client/mc/release/linux-arm64/mc -o /usr/local/bin/mc
+chmod +x /usr/local/bin/mc
 fi
-
 
 # ⏳ Attendre que MinIO soit prêt
 until curl -s "http://minio:9000" >/dev/null; do
