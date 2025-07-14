@@ -24,6 +24,22 @@ services:
       - minio_data:/data
     restart: always
 
+  init-minio:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      sh -c "
+        sleep 5 &&
+        mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+        mc mb --ignore-existing local/$${MINIO_BUCKET} &&
+        mc anonymous set download local/$${MINIO_BUCKET} &&
+        echo '[✔] MinIO prêt.'"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+
   back:
     container_name: ESGI-pa-back
     image: ghcr.io/louis-guidez/esgi-pa-back
@@ -47,6 +63,7 @@ services:
     depends_on:
       - db
       - minio
+      - init-minio
     restart: always
     command: >
       sh -c "php bin/console cache:warmup --env=prod &&

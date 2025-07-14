@@ -77,6 +77,8 @@ class AnnonceController extends AbstractController
             $photoUrls[] = $photo->getImageName();
         }
 
+        //test
+
         return $this->json([
             'id' => $annonce->getId(),
             'photos' => $photoUrls,
