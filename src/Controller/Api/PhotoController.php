@@ -11,9 +11,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Photo')]
 class PhotoController extends AbstractController
 {
+    #[OA\Get(path: '/api/photos', summary: 'List photos')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/photos', name: 'api_photos', methods: ['GET'])]
     public function index(PhotoRepository $photoRepository): JsonResponse
     {
@@ -32,6 +36,8 @@ class PhotoController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Post(path: '/api/photos', summary: 'Create photo')]
+    #[OA\Response(response: 201, description: 'Created')]
     #[Route('/api/photos', name: 'api_photos_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -49,6 +55,8 @@ class PhotoController extends AbstractController
         return $this->json(['id' => $photo->getId()], 201);
     }
 
+    #[OA\Put(path: '/api/photos/{id}', summary: 'Edit photo')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/photos/{id}', name: 'api_photos_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Photo $photo): JsonResponse
     {
@@ -64,6 +72,8 @@ class PhotoController extends AbstractController
         return $this->json(['status' => 'Photo updated']);
     }
 
+    #[OA\Delete(path: '/api/photos/{id}', summary: 'Delete photo')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/photos/{id}', name: 'api_photos_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Photo $photo): JsonResponse
     {

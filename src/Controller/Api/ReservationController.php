@@ -9,9 +9,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Reservation')]
 class ReservationController extends AbstractController
 {
+    #[OA\Get(path: '/api/reservations', summary: 'List reservations')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/reservations', name: 'api_reservations', methods: ['GET'])]
     public function index(ReservationRepository $reservationRepository): JsonResponse
     {
@@ -30,6 +34,8 @@ class ReservationController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Post(path: '/api/reservations', summary: 'Create reservation')]
+    #[OA\Response(response: 201, description: 'Created')]
     #[Route('/api/reservations', name: 'api_reservations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -50,6 +56,8 @@ class ReservationController extends AbstractController
         return $this->json(['id' => $reservation->getId()], 201);
     }
 
+    #[OA\Put(path: '/api/reservations/{id}', summary: 'Edit reservation')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/reservations/{id}', name: 'api_reservations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
     {
@@ -68,6 +76,8 @@ class ReservationController extends AbstractController
         return $this->json(['status' => 'Reservation updated']);
     }
 
+    #[OA\Delete(path: '/api/reservations/{id}', summary: 'Delete reservation')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/reservations/{id}', name: 'api_reservations_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
     {

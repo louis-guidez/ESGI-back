@@ -10,9 +10,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Auth')]
 class AuthController extends AbstractController
 {
+    #[OA\Post(path: '/api/register', summary: 'Register new user')]
+    #[OA\Response(response: 201, description: 'Created')]
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     public function register(
         Request $request,
@@ -56,6 +60,8 @@ class AuthController extends AbstractController
         return $this->json(['id' => $utilisateur->getId()], 201);
     }
 
+    #[OA\Post(path: '/api/login', summary: 'User login')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(
         Request $request,

@@ -8,9 +8,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Stripe')]
 class StripeController extends AbstractController
 {
+    #[OA\Post(path: '/api/create-payment-intent', summary: 'Create payment intent')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/create-payment-intent', name: 'create_payment_intent', methods: ['POST'])]
     public function createPaymentIntent(Request $request): JsonResponse
     {

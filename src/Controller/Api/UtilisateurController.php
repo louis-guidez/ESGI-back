@@ -9,9 +9,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Utilisateur')]
 class UtilisateurController extends AbstractController
 {
+    #[OA\Get(path: '/api/utilisateurs', summary: 'List utilisateurs')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/utilisateurs', name: 'api_utilisateurs', methods: ['GET'])]
     public function index(UtilisateurRepository $utilisateurRepository): JsonResponse
     {
@@ -38,6 +42,8 @@ class UtilisateurController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Post(path: '/api/utilisateurs', summary: 'Create utilisateur')]
+    #[OA\Response(response: 201, description: 'Created')]
     #[Route('/api/utilisateurs', name: 'api_utilisateurs_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -65,6 +71,8 @@ class UtilisateurController extends AbstractController
         return $this->json(['id' => $utilisateur->getId()], 201);
     }
 
+    #[OA\Put(path: '/api/utilisateurs/{id}', summary: 'Edit utilisateur')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse
     {
@@ -112,6 +120,8 @@ class UtilisateurController extends AbstractController
         return $this->json(['status' => 'Utilisateur updated']);
     }
 
+    #[OA\Delete(path: '/api/utilisateurs/{id}', summary: 'Delete utilisateur')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse
     {
