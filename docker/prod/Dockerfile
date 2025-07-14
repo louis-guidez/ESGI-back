@@ -22,8 +22,6 @@ FROM base AS build
 # Copy the project
 COPY . /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html/var /tmp
-
 # Prevent git permission errors during composer install
 RUN git config --global --add safe.directory /var/www/html
 
