@@ -12,9 +12,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Annonce')]
 class AnnonceController extends AbstractController
 {
+    #[OA\Get(path: '/api/annonces', summary: 'List annonces')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/annonces', name: 'api_annonces', methods: ['GET'])]
     public function index(AnnonceRepository $annonceRepository, ParameterBagInterface $params): JsonResponse
     {
@@ -42,6 +46,8 @@ class AnnonceController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Post(path: '/api/annonces', summary: 'Create annonce')]
+    #[OA\Response(response: 201, description: 'Created')]
     #[Route('/api/annonces', name: 'api_annonces_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -85,6 +91,8 @@ class AnnonceController extends AbstractController
         ], 201);
     }
 
+    #[OA\Put(path: '/api/annonces/{id}', summary: 'Edit annonce')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {
@@ -103,6 +111,8 @@ class AnnonceController extends AbstractController
         return $this->json(['status' => 'Annonce updated']);
     }
 
+    #[OA\Delete(path: '/api/annonces/{id}', summary: 'Delete annonce')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/annonces/{id}', name: 'api_annonces_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {

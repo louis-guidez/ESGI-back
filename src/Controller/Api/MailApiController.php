@@ -9,9 +9,13 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Mail')]
 class MailApiController extends AbstractController
 {
+    #[OA\Get(path: '/test-email', summary: 'Send test email')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/test-email', name: 'test_email')]
     public function send(MailerInterface $mailer): Response
     {

@@ -9,9 +9,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Conversation')]
 class ConversationController extends AbstractController
 {
+    #[OA\Get(path: '/api/conversations', summary: 'List conversations')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/conversations', name: 'api_conversations', methods: ['GET'])]
     public function index(ConversationRepository $conversationRepository): JsonResponse
     {
@@ -28,6 +32,8 @@ class ConversationController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Post(path: '/api/conversations', summary: 'Create conversation')]
+    #[OA\Response(response: 201, description: 'Created')]
     #[Route('/api/conversations', name: 'api_conversations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -44,6 +50,8 @@ class ConversationController extends AbstractController
         return $this->json(['id' => $conversation->getId()], 201);
     }
 
+    #[OA\Put(path: '/api/conversations/{id}', summary: 'Edit conversation')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/conversations/{id}', name: 'api_conversations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
@@ -58,6 +66,8 @@ class ConversationController extends AbstractController
         return $this->json(['status' => 'Conversation updated']);
     }
 
+    #[OA\Delete(path: '/api/conversations/{id}', summary: 'Delete conversation')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/conversations/{id}', name: 'api_conversations_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
