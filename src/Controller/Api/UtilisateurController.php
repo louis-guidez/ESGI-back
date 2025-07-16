@@ -42,7 +42,7 @@ class UtilisateurController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Post(path: '/api/utilisateurs', summary: 'Create utilisateur')]
+    #[OA\Post(path: '/api/secure/utilisateurs', summary: 'Create utilisateur')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
         required: true,
@@ -65,7 +65,7 @@ class UtilisateurController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/utilisateurs', name: 'api_utilisateurs_new', methods: ['POST'])]
+    #[Route('/api/secure/utilisateurs', name: 'api_utilisateurs_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -92,7 +92,7 @@ class UtilisateurController extends AbstractController
         return $this->json(['id' => $utilisateur->getId()], 201);
     }
 
-    #[OA\Put(path: '/api/utilisateurs/{id}', summary: 'Edit utilisateur')]
+    #[OA\Put(path: '/api/secure/utilisateurs/{id}', summary: 'Edit utilisateur')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -113,7 +113,7 @@ class UtilisateurController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_edit', methods: ['PUT'])]
+    #[Route('/api/secure/utilisateurs/{id}', name: 'api_utilisateurs_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -160,7 +160,7 @@ class UtilisateurController extends AbstractController
         return $this->json(['status' => 'Utilisateur updated']);
     }
 
-    #[OA\Delete(path: '/api/utilisateurs/{id}', summary: 'Delete utilisateur')]
+    #[OA\Delete(path: '/api/secure/utilisateurs/{id}', summary: 'Delete utilisateur')]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse

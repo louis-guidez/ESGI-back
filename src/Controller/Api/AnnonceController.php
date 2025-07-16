@@ -46,7 +46,7 @@ class AnnonceController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Post(path: '/api/annonces', summary: 'Create annonce')]
+    #[OA\Post(path: '/api/secure/annonces', summary: 'Create annonce')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
         required: true,
@@ -69,7 +69,7 @@ class AnnonceController extends AbstractController
             )
         )
     )]
-    #[Route('/api/annonces', name: 'api_annonces_new', methods: ['POST'])]
+    #[Route('/api/secure/annonces', name: 'api_annonces_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $annonce = new Annonce();
@@ -112,7 +112,7 @@ class AnnonceController extends AbstractController
         ], 201);
     }
 
-    #[OA\Put(path: '/api/annonces/{id}', summary: 'Edit annonce')]
+    #[OA\Put(path: '/api/secure/annonces/{id}', summary: 'Edit annonce')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
         required: true,
@@ -127,7 +127,7 @@ class AnnonceController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]
+    #[Route('/api/secure/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -145,7 +145,7 @@ class AnnonceController extends AbstractController
         return $this->json(['status' => 'Annonce updated']);
     }
 
-    #[OA\Delete(path: '/api/annonces/{id}', summary: 'Delete annonce')]
+    #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Delete annonce')]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/annonces/{id}', name: 'api_annonces_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
