@@ -5,33 +5,23 @@ namespace App\Controller\Api;
 use App\Entity\Message;
 use App\Repository\MessageRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mercure\Hub;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Jwt\StaticTokenProvider;
+use Symfony\Component\Mercure\Publisher;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
 use OpenApi\Attributes as OA;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[OA\Tag(name: 'Message')]
 class MessageController extends AbstractController
 {
-    #[OA\Get(path: '/api/messages', summary: 'List messages')]
-    #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/messages', name: 'api_messages', methods: ['GET'])]
-    public function index(MessageRepository $messageRepository): JsonResponse
-    {
-        $messages = $messageRepository->findAll();
-
-        $data = [];
-        foreach ($messages as $message) {
-            $data[] = [
-                'id' => $message->getId(),
-                'contenu' => $message->getContenu(),
-                'dateEnvoi' => $message->getDateEnvoi()?->format('Y-m-d H:i:s'),
-            ];
-        }
-
-        return $this->json($data);
-    }
 
     #[OA\Post(path: '/api/messages', summary: 'Create message')]
     #[OA\Response(response: 201, description: 'Created')]

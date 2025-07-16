@@ -67,6 +67,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UtilisateurConversation::class, mappedBy: 'utilisateur')]
     private Collection $utilisateurConversations;
 
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
+    private Collection $sentMessages;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Message::class)]
+    private Collection $receivedMessages;
+
+
     public function __construct()
     {
         $this->utilisateurConversations = new ArrayCollection();
