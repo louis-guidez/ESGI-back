@@ -84,7 +84,6 @@ class AuthController extends AbstractController
 
 
 
-
 //    #[OA\Post(path: '/api/login', summary: 'User login')]
 //    #[OA\Response(response: 200, description: 'Success')]
 //    #[OA\RequestBody(
