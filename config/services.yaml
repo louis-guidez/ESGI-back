@@ -6,6 +6,8 @@
 parameters:
     photos_directory: '%kernel.project_dir%/public/uploads/photos'
     minio_endpoint: '%env(ENDPOINT_MINIO_NAV)%'
+    mercure.jwt: '%env(MERCURE_JWT_SECRET)%'
+    mercure.internal_url: '%env(MERCURE_URL)%'
 
 services:
     # default configuration for services in *this* file

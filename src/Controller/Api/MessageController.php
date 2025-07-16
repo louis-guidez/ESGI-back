@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Message;
+use App\Entity\Utilisateur;
 use App\Repository\MessageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -23,32 +24,77 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class MessageController extends AbstractController
 {
 
-    #[OA\Post(path: '/api/messages', summary: 'Create message')]
-    #[OA\Response(response: 201, description: 'Created')]
+    #[OA\Post(path: '/api/messages', summary: 'Create and publish a new message')]
+    #[OA\Response(response: 201, description: 'Message created and broadcasted')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
             type: 'object',
             properties: [
                 new OA\Property(property: 'contenu', type: 'string'),
-                new OA\Property(property: 'dateEnvoi', type: 'string', format: 'date-time')
+                new OA\Property(property: 'receiver_id', type: 'integer')
             ]
         )
     )]
     #[Route('/api/messages', name: 'api_messages_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        HttpClientInterface $httpClient,
+        ParameterBagInterface $params
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
-        $message = new Message();
-        $message->setContenu($data['contenu'] ?? null);
-        if (isset($data['dateEnvoi'])) {
-            $message->setDateEnvoi(new \DateTime($data['dateEnvoi']));
+        $sender = $this->getUser();
+        $receiverId = $data['receiver_id'] ?? null;
+        $contenu = $data['contenu'] ?? null;
+
+        if (!$contenu || !$receiverId || !$sender) {
+            return $this->json(['error' => 'Invalid data or unauthenticated.'], Response::HTTP_BAD_REQUEST);
         }
+
+        $receiver = $entityManager->getRepository(Utilisateur::class)->find($receiverId);
+
+        if (!$receiver) {
+            return $this->json(['error' => 'Receiver not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $message = new Message();
+        $message->setContenu($contenu);
+        $message->setSender($sender);
+        $message->setReceiver($receiver);
+        $message->setDateEnvoi(new \DateTime());
 
         $entityManager->persist($message);
         $entityManager->flush();
 
-        return $this->json(['id' => $message->getId()], 201);
+        // Generate topic name
+        $topic = 'https://chat.mercure/messages/' . $this->generateTopic($sender->getId(), $receiver->getId());
+
+        // Create publisher and JWT
+        $jwt = $params->get('mercure.jwt');
+        $mercureUrl = $params->get('mercure.internal_url');
+
+        $publisher = new Publisher($mercureUrl, new StaticTokenProvider($jwt), $httpClient);
+
+        $update = new Update(
+            $topic,
+            json_encode([
+                'id' => $message->getId(),
+                'contenu' => $message->getContenu(),
+                'dateEnvoi' => $message->getDateEnvoi()->format('Y-m-d H:i:s'),
+                'from' => $sender->getId(),
+                'to' => $receiver->getId()
+            ])
+        );
+
+        $publisher($update);
+
+        return $this->json(['status' => 'Message sent', 'id' => $message->getId()], Response::HTTP_CREATED);
+    }
+
+    private function generateTopic(int $id1, int $id2): string
+    {
+        return $id1 < $id2 ? "$id1-$id2" : "$id2-$id1";
     }
 
     #[OA\Put(path: '/api/messages/{id}', summary: 'Edit message')]
