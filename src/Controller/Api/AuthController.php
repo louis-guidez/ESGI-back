@@ -81,41 +81,45 @@ class AuthController extends AbstractController
         return $this->json(['id' => $utilisateur->getId()], 201);
     }
 
-    #[OA\Post(path: '/api/login', summary: 'User login')]
-    #[OA\Response(response: 200, description: 'Success')]
-    #[OA\RequestBody(
-        required: true,
-        content: new OA\JsonContent(
-            type: 'object',
-            required: ['email', 'password'],
-            properties: [
-                new OA\Property(property: 'email', type: 'string'),
-                new OA\Property(property: 'password', type: 'string')
-            ]
-        )
-    )]
-    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    public function login(
-        Request $request,
-        UtilisateurRepository $utilisateurRepository,
-        UserPasswordHasherInterface $passwordHasher
-    ): JsonResponse {
-        $data = json_decode($request->getContent(), true);
 
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
-        if (!$email || !$password) {
-            return $this->json(['error' => 'Invalid credentials'], 400);
-        }
 
-        $utilisateur = $utilisateurRepository->findOneBy(['email' => $email]);
-        if (!$utilisateur || !$passwordHasher->isPasswordValid($utilisateur, $password)) {
-            return $this->json(['error' => 'Invalid credentials'], 401);
-        }
 
-        return $this->json([
-            'message' => 'Login successful',
-            'userId' => $utilisateur->getId(),
-        ]);
-    }
+
+//    #[OA\Post(path: '/api/login', summary: 'User login')]
+//    #[OA\Response(response: 200, description: 'Success')]
+//    #[OA\RequestBody(
+//        required: true,
+//        content: new OA\JsonContent(
+//            type: 'object',
+//            required: ['email', 'password'],
+//            properties: [
+//                new OA\Property(property: 'email', type: 'string'),
+//                new OA\Property(property: 'password', type: 'string')
+//            ]
+//        )
+//    )]
+//    #[Route('/api/login', name: 'api_login', methods: ['POST'])]
+//    public function login(
+//        Request $request,
+//        UtilisateurRepository $utilisateurRepository,
+//        UserPasswordHasherInterface $passwordHasher
+//    ): JsonResponse {
+//        $data = json_decode($request->getContent(), true);
+//
+//        $email = $data['email'] ?? null;
+//        $password = $data['password'] ?? null;
+//        if (!$email || !$password) {
+//            return $this->json(['error' => 'Invalid credentials'], 400);
+//        }
+//
+//        $utilisateur = $utilisateurRepository->findOneBy(['email' => $email]);
+//        if (!$utilisateur || !$passwordHasher->isPasswordValid($utilisateur, $password)) {
+//            return $this->json(['error' => 'Invalid credentials'], 401);
+//        }
+//
+//        return $this->json([
+//            'message' => 'Login successful',
+//            'userId' => $utilisateur->getId(),
+//        ]);
+//    }
 }
