@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
+use App\Entity\Conversation;
 
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 #[ApiResource(
@@ -37,6 +38,9 @@ class Message
     #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
     #[Groups(['message:read', 'message:write'])]
     private ?Utilisateur $receiver = null;
+
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    private ?Conversation $conversation = null;
 
     public function __construct()
     {
@@ -92,6 +96,18 @@ class Message
     public function setReceiver(?Utilisateur $receiver): static
     {
         $this->receiver = $receiver;
+
+        return $this;
+    }
+
+    public function getConversation(): ?Conversation
+    {
+        return $this->conversation;
+    }
+
+    public function setConversation(?Conversation $conversation): static
+    {
+        $this->conversation = $conversation;
 
         return $this;
     }
