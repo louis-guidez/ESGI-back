@@ -3,7 +3,9 @@
 namespace App\Controller\Api;
 
 use App\Entity\Conversation;
+use App\Entity\UtilisateurConversation;
 use App\Repository\ConversationRepository;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,24 +40,62 @@ class ConversationController extends AbstractController
         content: new OA\JsonContent(
             type: 'object',
             properties: [
-                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'utilisateurIds', type: 'array', items: new OA\Items(type: 'integer'))
             ]
         )
     )]
     #[Route('/api/conversations', name: 'api_conversations_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function new(Request $request, EntityManagerInterface $entityManager, ConversationRepository $conversationRepository, UtilisateurRepository $utilisateurRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+        $ids = $data['utilisateurIds'] ?? [];
 
-        $conversation = new Conversation();
-        if (isset($data['dateCreation'])) {
-            $conversation->setDateCreation(new \DateTime($data['dateCreation']));
+        if (count($ids) < 2) {
+            return $this->json(['error' => 'At least two utilisateurs required'], 400);
         }
 
-        $entityManager->persist($conversation);
-        $entityManager->flush();
+        $conversation = null;
+        if (count($ids) === 2) {
+            $conversation = $conversationRepository->findBetweenUsers($ids[0], $ids[1]);
+        }
 
-        return $this->json(['id' => $conversation->getId()], 201);
+        if (!$conversation) {
+            $conversation = new Conversation();
+            if (isset($data['dateCreation'])) {
+                $conversation->setDateCreation(new \DateTime($data['dateCreation']));
+            }
+
+            $entityManager->persist($conversation);
+            foreach ($ids as $id) {
+                $user = $utilisateurRepository->find($id);
+                if ($user) {
+                    $uc = new UtilisateurConversation();
+                    $uc->setUtilisateur($user);
+                    $uc->setConversation($conversation);
+                    $entityManager->persist($uc);
+                }
+            }
+
+            $entityManager->flush();
+        }
+
+        $participants = [];
+        foreach ($conversation->getUtilisateurConversations() as $uc) {
+            $user = $uc->getUtilisateur();
+            if ($user) {
+                $participants[] = [
+                    'id' => $user->getId(),
+                    'nom' => $user->getNom(),
+                    'prenom' => $user->getPrenom(),
+                ];
+            }
+        }
+
+        return $this->json([
+            'id' => $conversation->getId(),
+            'participants' => $participants,
+        ], 201);
     }
 
     #[OA\Put(path: '/api/conversations/{id}', summary: 'Edit conversation')]
