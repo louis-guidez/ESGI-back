@@ -101,6 +101,29 @@ class MessageController extends AbstractController
         return $id1 < $id2 ? "$id1-$id2" : "$id2-$id1";
     }
 
+    #[Route('/api/messages/conversation/{id}', name: 'get_conversation_messages', methods: ['GET'])]
+    public function getConversationMessages(
+        Utilisateur $id,
+        MessageRepository $repository,
+        Security $security
+    ): JsonResponse {
+        $currentUser = $security->getUser();
+
+        $messages = $repository->findConversationMessages($currentUser, $id);
+
+        $data = array_map(static function (Message $message) {
+            return [
+                'id' => $message->getId(),
+                'contenu' => $message->getContenu(),
+                'from' => $message->getSender()?->getId(),
+                'to' => $message->getReceiver()?->getId(),
+                'date' => $message->getDateEnvoi()?->format('Y-m-d H:i'),
+            ];
+        }, $messages);
+
+        return $this->json($data);
+    }
+
     #[OA\Put(path: '/api/messages/{id}', summary: 'Edit message')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
