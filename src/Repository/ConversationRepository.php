@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Conversation;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,19 @@ class ConversationRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Conversation::class);
+    }
+
+    /**
+     * Find a conversation where the given users are participants, regardless of order.
+     */
+    public function findByParticipants(Utilisateur $a, Utilisateur $b): ?Conversation
+    {
+        return $this->createQueryBuilder('c')
+            ->where('(c.participant1 = :a AND c.participant2 = :b) OR (c.participant1 = :b AND c.participant2 = :a)')
+            ->setParameter('a', $a)
+            ->setParameter('b', $b)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**
