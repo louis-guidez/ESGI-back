@@ -16,7 +16,7 @@ class TestMercureController
         $ch = curl_init();
 
         curl_setopt_array($ch, [
-            CURLOPT_URL => 'http://mercure/.well-known/mercure',
+            CURLOPT_URL => 'http:/mercure/.well-known/mercure',
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POSTFIELDS => http_build_query([
@@ -53,7 +53,7 @@ class TestMercureController
                 ],
                 'exp' => time() + 3600
             ],
-            'esgi-pa-mercure-jwt-token-bien-long', // ⚠️ Même que dans MERCURE_JWT_SECRET
+            'esgi-pa-super-secret-cle-mercure-2025', // ⚠️ Même que dans MERCURE_JWT_SECRET
             'HS256'
         );
     }

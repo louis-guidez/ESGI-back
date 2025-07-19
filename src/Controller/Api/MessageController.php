@@ -39,7 +39,7 @@ class MessageController extends AbstractController
 //            ]
 //        )
 //    )]
-    #[Route('/api/messages', name: 'send_message', methods: ['POST'])]
+    #[Route('/api/secure/messages', name: 'send_message', methods: ['POST'])]
     public function sendMessage(
         Request $request,
         EntityManagerInterface $em,
@@ -50,6 +50,9 @@ class MessageController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $sender = $security->getUser();
+        if (!$sender) {
+            return $this->json(['error' => 'Receiver not found'], 404);
+        }
         $receiverId = $data['to'] ?? null;
         $contenu = $data['contenu'] ?? null;
 
@@ -74,9 +77,13 @@ class MessageController extends AbstractController
         // Mercure
         $topic = 'https://chat.mercure/conversation/' . $this->generateTopic($sender->getId(), $receiver->getId());
 
+        $jwt = $this->createMercureJwt([
+            'publish' => ['*'],
+        ], $params->get('mercure.jwt'));
+
         $publisher = new Publisher(
             $params->get('mercure.internal_url'),
-            new StaticTokenProvider($params->get('mercure.jwt')),
+            new StaticTokenProvider($jwt),
             $http
         );
 
@@ -91,9 +98,25 @@ class MessageController extends AbstractController
             ])
         );
 
-        $publisher($update);
+        try {
+            $publisher($update);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Erreur Mercure',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
 
-        return $this->json(['message' => 'Message envoyé']);
+        return $this->json([
+            'from' => $sender->getId(),
+            'to' => $receiver->getId(),
+            'contenu' => $contenu,
+            'date' => $message->getDateEnvoi()->format('Y-m-d H:i:s'),
+            'topic' => $topic,
+            'mercure_payload' => json_decode($update->getData(), true),
+        ]);
+
     }
 
     private function generateTopic(int $id1, int $id2): string
@@ -101,7 +124,7 @@ class MessageController extends AbstractController
         return $id1 < $id2 ? "$id1-$id2" : "$id2-$id1";
     }
 
-    #[Route('/api/messages/conversation/{id}', name: 'get_conversation_messages', methods: ['GET'])]
+    #[Route('/api/secure/messages/conversation/{id}', name: 'get_conversation_messages', methods: ['GET'])]
     public function getConversationMessages(
         Utilisateur $id,
         MessageRepository $repository,
@@ -124,7 +147,7 @@ class MessageController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Put(path: '/api/messages/{id}', summary: 'Edit message')]
+    #[OA\Put(path: '/api/secure/messages/{id}', summary: 'Edit message')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -135,7 +158,7 @@ class MessageController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/messages/{id}', name: 'api_messages_edit', methods: ['PUT'])]
+    #[Route('/api/secure/messages/{id}', name: 'api_messages_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Message $message): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -152,7 +175,7 @@ class MessageController extends AbstractController
 
 //    #[OA\Delete(path: '/api/messages/{id}', summary: 'Delete message')]
 //    #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/messages/{id}', name: 'api_messages_delete', methods: ['DELETE'])]
+    #[Route('/api/secure/messages/{id}', name: 'api_messages_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Message $message): JsonResponse
     {
         $entityManager->remove($message);
@@ -161,7 +184,7 @@ class MessageController extends AbstractController
         return $this->json(['status' => 'Message deleted']);
     }
 
-    #[Route('/api/mercure/token', name: 'mercure_token')]
+    #[Route('/api/secure/mercure/token', name: 'mercure_token')]
     public function mercureToken(Security $security, ParameterBagInterface $params): Response
     {
         $user = $security->getUser();
@@ -172,21 +195,24 @@ class MessageController extends AbstractController
         $jwt = $this->createMercureJwt([$topic], $params);
 
         $response = new Response('JWT Mercure généré');
+
         $cookie = Cookie::create('mercureAuthorization', "Bearer $jwt")
             ->withHttpOnly(true)
             ->withSecure(true)
             ->withSameSite('Strict')
             ->withPath('/.well-known/mercure');
 
+        if ($_ENV['APP_ENV'] !== 'prod') {
+            $cookie = $cookie->withSecure(false);
+        }
+
         $response->headers->setCookie($cookie);
 
         return $response;
     }
 
-    private function createMercureJwt(array $topics, ParameterBagInterface $params): string
+    private function createMercureJwt(array $claims, string $secret): string
     {
-        $secret = $params->get('mercure.jwt');
-
         $config = Configuration::forSymmetricSigner(
             new Sha256(),
             \Lcobucci\JWT\Signer\Key\InMemory::plainText($secret)
@@ -194,12 +220,11 @@ class MessageController extends AbstractController
 
         $now = new \DateTimeImmutable();
 
-        $token = $config->builder()
+        return $config->builder()
             ->issuedAt($now)
             ->expiresAt($now->modify('+1 hour'))
-            ->withClaim('mercure', ['subscribe' => $topics])
-            ->getToken($config->signer(), $config->signingKey());
-
-        return $token->toString();
+            ->withClaim('mercure', $claims) // ← supporte publish et/ou subscribe
+            ->getToken($config->signer(), $config->signingKey())
+            ->toString();
     }
 }

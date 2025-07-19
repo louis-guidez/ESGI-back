@@ -49,10 +49,17 @@ class Annonce
     #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'annonce')]
     private Collection $photos;
 
+    /**
+     * @var Collection<int, Categorie>
+     */
+    #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'annonces')]
+    private Collection $categorie;
+
     public function __construct()
     {
         $this->photos = new ArrayCollection();
         $this->reservations = new ArrayCollection();
+        $this->categorie = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -188,6 +195,30 @@ class Annonce
                 $reservation->setAnnonce(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Categorie>
+     */
+    public function getCategorie(): Collection
+    {
+        return $this->categorie;
+    }
+
+    public function addCategorie(Categorie $categorie): static
+    {
+        if (!$this->categorie->contains($categorie)) {
+            $this->categorie->add($categorie);
+        }
+
+        return $this;
+    }
+
+    public function removeCategorie(Categorie $categorie): static
+    {
+        $this->categorie->removeElement($categorie);
 
         return $this;
     }
