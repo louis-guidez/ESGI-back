@@ -40,6 +40,7 @@ class Message
     private ?Utilisateur $receiver = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Conversation $conversation = null;
 
     public function __construct()
