@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Conversation;
+use App\Entity\Utilisateur;
 use App\Entity\UtilisateurConversation;
 use App\Repository\UtilisateurConversationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,8 +38,10 @@ class UtilisateurConversationController extends AbstractController
     #[OA\Post(path: '/api/utilisateur-conversations', summary: 'Create utilisateur conversation')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
+        required: true,
         content: new OA\JsonContent(
             type: 'object',
+            required: ['utilisateurId', 'conversationId'],
             properties: [
                 new OA\Property(property: 'utilisateurId', type: 'integer'),
                 new OA\Property(property: 'conversationId', type: 'integer')
@@ -49,8 +53,22 @@ class UtilisateurConversationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
+        $utilisateur = null;
+        if (isset($data['utilisateurId'])) {
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)
+                ->find($data['utilisateurId']);
+        }
+
+        $conversation = null;
+        if (isset($data['conversationId'])) {
+            $conversation = $entityManager->getRepository(Conversation::class)
+                ->find($data['conversationId']);
+        }
+
         $item = new UtilisateurConversation();
-        // In a real app we would fetch related entities by ID.
+        $item->setUtilisateur($utilisateur);
+        $item->setConversation($conversation);
+
         $entityManager->persist($item);
         $entityManager->flush();
 
