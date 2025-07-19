@@ -36,6 +36,7 @@ class AnnonceController extends AbstractController
                 'id' => $annonce->getId(),
                 'titre' => $annonce->getTitre(),
                 'description' => $annonce->getDescription(),
+                'categorie' => $annonce->getCategorie(),
                 'prix' => $annonce->getPrix(),
                 'statut' => $annonce->getStatut(),
                 'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
