@@ -89,7 +89,7 @@ class AnnonceController extends AbstractController
         if ($files && is_array($files)) {
             foreach ($files as $file) {
                 $photo = new Photo();
-                $photo->setImageFile($file); // VichUploader gère urlChemin
+                $photo->setImageFile($file); // VichUploader handles the upload
                 $photo->setDateUpload(new \DateTime());
                 $photo->setAnnonce($annonce);
                 $entityManager->persist($photo);
