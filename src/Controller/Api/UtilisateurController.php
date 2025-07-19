@@ -89,7 +89,22 @@ class UtilisateurController extends AbstractController
         $entityManager->persist($utilisateur);
         $entityManager->flush();
 
-        return $this->json(['id' => $utilisateur->getId()], 201);
+        $dataUser[] = [
+            'id' => $utilisateur->getId(),
+            'email' => $utilisateur->getEmail(),
+            'roles' => $utilisateur->getRoles(),
+            'nom' => $utilisateur->getNom(),
+            'prenom' => $utilisateur->getPrenom(),
+            'dateInscription' => $utilisateur->getDateInscription()?->format('Y-m-d H:i:s'),
+            'cagnotte' => $utilisateur->getCagnotte(),
+            'emailIsVerified' => $utilisateur->isEmailIsVerified(),
+            'adresse' => $utilisateur->getAdresse(),
+            'postalCode' => $utilisateur->getPostalCode(),
+            'ville' => $utilisateur->getVille(),
+            'pays' => $utilisateur->getPays(),
+        ];
+
+        return $this->json($dataUser, 201);
     }
 
     #[OA\Put(path: '/api/secure/utilisateurs/{id}', summary: 'Edit utilisateur')]
@@ -157,7 +172,22 @@ class UtilisateurController extends AbstractController
 
         $entityManager->flush();
 
-        return $this->json(['status' => 'Utilisateur updated']);
+        $dataUser[] = [
+            'id' => $utilisateur->getId(),
+            'email' => $utilisateur->getEmail(),
+            'roles' => $utilisateur->getRoles(),
+            'nom' => $utilisateur->getNom(),
+            'prenom' => $utilisateur->getPrenom(),
+            'dateInscription' => $utilisateur->getDateInscription()?->format('Y-m-d H:i:s'),
+            'cagnotte' => $utilisateur->getCagnotte(),
+            'emailIsVerified' => $utilisateur->isEmailIsVerified(),
+            'adresse' => $utilisateur->getAdresse(),
+            'postalCode' => $utilisateur->getPostalCode(),
+            'ville' => $utilisateur->getVille(),
+            'pays' => $utilisateur->getPays(),
+        ];
+
+        return $this->json($dataUser);
     }
 
     #[OA\Delete(path: '/api/secure/utilisateurs/{id}', summary: 'Delete utilisateur')]
@@ -165,9 +195,24 @@ class UtilisateurController extends AbstractController
     #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse
     {
+        $data[] = [
+            'id' => $utilisateur->getId(),
+            'email' => $utilisateur->getEmail(),
+            'roles' => $utilisateur->getRoles(),
+            'nom' => $utilisateur->getNom(),
+            'prenom' => $utilisateur->getPrenom(),
+            'dateInscription' => $utilisateur->getDateInscription()?->format('Y-m-d H:i:s'),
+            'cagnotte' => $utilisateur->getCagnotte(),
+            'emailIsVerified' => $utilisateur->isEmailIsVerified(),
+            'adresse' => $utilisateur->getAdresse(),
+            'postalCode' => $utilisateur->getPostalCode(),
+            'ville' => $utilisateur->getVille(),
+            'pays' => $utilisateur->getPays(),
+        ];
+
         $entityManager->remove($utilisateur);
         $entityManager->flush();
 
-        return $this->json(['status' => 'Utilisateur deleted']);
+        return $this->json($data);
     }
 }
