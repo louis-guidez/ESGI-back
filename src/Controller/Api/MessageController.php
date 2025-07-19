@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Message;
 use App\Repository\MessageRepository;
+use App\Repository\ConversationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,6 +17,36 @@ class MessageController extends AbstractController
     public function index(MessageRepository $messageRepository): JsonResponse
     {
         $messages = $messageRepository->findAll();
+
+        $data = [];
+        foreach ($messages as $message) {
+            $data[] = [
+                'id' => $message->getId(),
+                'contenu' => $message->getContenu(),
+                'dateEnvoi' => $message->getDateEnvoi()?->format('Y-m-d H:i:s'),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/conversations/{user1Id}/{user2Id}/messages', methods: ['GET'])]
+    public function messagesBetweenUsers(
+        int $user1Id,
+        int $user2Id,
+        ConversationRepository $conversationRepository,
+        MessageRepository $messageRepository
+    ): JsonResponse {
+        $conversation = $conversationRepository->findConversationBetweenUsers($user1Id, $user2Id);
+
+        if (!$conversation) {
+            return $this->json([]);
+        }
+
+        $messages = $messageRepository->findBy(
+            ['conversation' => $conversation],
+            ['dateEnvoi' => 'ASC']
+        );
 
         $data = [];
         foreach ($messages as $message) {
