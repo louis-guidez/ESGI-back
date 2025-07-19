@@ -7,8 +7,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Message;
+use App\Entity\Utilisateur;
 
 #[ORM\Entity(repositoryClass: ConversationRepository::class)]
+#[ORM\Table(uniqueConstraints: [new ORM\UniqueConstraint(name: 'UNIQ_PARTICIPANTS', columns: ['participant1_id', 'participant2_id'])])]
 class Conversation
 {
     #[ORM\Id]
@@ -19,11 +21,14 @@ class Conversation
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateCreation = null;
 
-    /**
-     * @var Collection<int, UtilisateurConversation>
-     */
-    #[ORM\OneToMany(targetEntity: UtilisateurConversation::class, mappedBy: 'conversation')]
-    private Collection $utilisateurConversations;
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Utilisateur $participant1 = null;
+
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Utilisateur $participant2 = null;
+
 
     /**
      * @var Collection<int, Message>
@@ -33,7 +38,6 @@ class Conversation
 
     public function __construct()
     {
-        $this->utilisateurConversations = new ArrayCollection();
         $this->messages = new ArrayCollection();
     }
 
@@ -54,35 +58,30 @@ class Conversation
         return $this;
     }
 
-    /**
-     * @return Collection<int, UtilisateurConversation>
-     */
-    public function getUtilisateurConversations(): Collection
+    public function getParticipant1(): ?Utilisateur
     {
-        return $this->utilisateurConversations;
+        return $this->participant1;
     }
 
-    public function addUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
+    public function setParticipant1(?Utilisateur $participant1): static
     {
-        if (!$this->utilisateurConversations->contains($utilisateurConversation)) {
-            $this->utilisateurConversations->add($utilisateurConversation);
-            $utilisateurConversation->setConversation($this);
-        }
+        $this->participant1 = $participant1;
 
         return $this;
     }
 
-    public function removeUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
+    public function getParticipant2(): ?Utilisateur
     {
-        if ($this->utilisateurConversations->removeElement($utilisateurConversation)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurConversation->getConversation() === $this) {
-                $utilisateurConversation->setConversation(null);
-            }
-        }
+        return $this->participant2;
+    }
+
+    public function setParticipant2(?Utilisateur $participant2): static
+    {
+        $this->participant2 = $participant2;
 
         return $this;
     }
+
 
     /**
      * @return Collection<int, Message>
