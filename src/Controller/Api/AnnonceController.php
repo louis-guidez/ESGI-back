@@ -55,6 +55,44 @@ class AnnonceController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Get(path: '/api/annonces/{id}', summary: 'Show annonce')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[OA\Response(response: 404, description: 'Not found')]
+    #[Route('/api/annonces/{id}', name: 'api_annonces_show', methods: ['GET'])]
+    public function show(int $id, AnnonceRepository $annonceRepository, ParameterBagInterface $params): JsonResponse
+    {
+        $annonce = $annonceRepository->find($id);
+
+        if (!$annonce) {
+            return $this->json(['error' => 'Annonce not found'], 404);
+        }
+
+        $endpoint = rtrim($params->get('minio_endpoint'), '/');
+
+        $photos = [];
+        foreach ($annonce->getPhotos() as $photo) {
+            $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
+        }
+
+        $categories = [];
+        foreach ($annonce->getCategorie() as $categorie) {
+            $categories[] = $categorie->getLabel();
+        }
+
+        $data = [
+            'id' => $annonce->getId(),
+            'titre' => $annonce->getTitre(),
+            'description' => $annonce->getDescription(),
+            'categories' => $categories,
+            'prix' => $annonce->getPrix(),
+            'statut' => $annonce->getStatut(),
+            'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
+            'photos' => $photos,
+        ];
+
+        return $this->json($data);
+    }
+
     #[OA\Post(path: '/api/secure/annonces', summary: 'Create annonce')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
