@@ -18,17 +18,18 @@ class ConversationRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find a conversation between two participants.
+     * Find a conversation containing exactly the given participants.
      */
-    public function findByParticipants(Utilisateur $a, Utilisateur $b): ?Conversation
+    public function findByParticipants(Utilisateur $participant1, Utilisateur $participant2): ?Conversation
     {
         return $this->createQueryBuilder('c')
-            ->innerJoin('c.utilisateurConversations', 'ua')
-            ->innerJoin('c.utilisateurConversations', 'ub')
-            ->andWhere('ua.utilisateur = :a')
-            ->andWhere('ub.utilisateur = :b')
-            ->setParameter('a', $a)
-            ->setParameter('b', $b)
+            ->innerJoin('c.utilisateurConversations', 'uc1')
+            ->innerJoin('c.utilisateurConversations', 'uc2')
+            ->andWhere('uc1.utilisateur = :p1')
+            ->andWhere('uc2.utilisateur = :p2')
+            ->setParameter('p1', $participant1)
+            ->setParameter('p2', $participant2)
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }

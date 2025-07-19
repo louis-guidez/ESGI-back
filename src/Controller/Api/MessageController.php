@@ -4,8 +4,10 @@ namespace App\Controller\Api;
 
 use App\Entity\Message;
 use App\Entity\Utilisateur;
+use App\Repository\MessageRepository;
 use App\Repository\ConversationRepository;
-use App\Repository\UtilisateurRepository;
+use App\Entity\Conversation;
+use App\Entity\UtilisateurConversation;
 use Doctrine\ORM\EntityManagerInterface;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -46,7 +48,8 @@ class MessageController extends AbstractController
         EntityManagerInterface $em,
         HttpClientInterface $http,
         ParameterBagInterface $params,
-        Security $security
+        Security $security,
+        ConversationRepository $conversationRepository
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
 
@@ -66,11 +69,29 @@ class MessageController extends AbstractController
             return $this->json(['error' => 'Receiver not found'], 404);
         }
 
+        $conversation = $conversationRepository->findByParticipants($sender, $receiver);
+        if (!$conversation) {
+            $conversation = new Conversation();
+            $conversation->setDateCreation(new \DateTime());
+            $em->persist($conversation);
+
+            $uc1 = new UtilisateurConversation();
+            $uc1->setUtilisateur($sender);
+            $uc1->setConversation($conversation);
+            $em->persist($uc1);
+
+            $uc2 = new UtilisateurConversation();
+            $uc2->setUtilisateur($receiver);
+            $uc2->setConversation($conversation);
+            $em->persist($uc2);
+        }
+
         $message = new Message();
         $message->setContenu($contenu);
         $message->setSender($sender);
         $message->setReceiver($receiver);
         $message->setDateEnvoi(new \DateTime());
+        $message->setConversation($conversation);
 
         $em->persist($message);
         $em->flush();
