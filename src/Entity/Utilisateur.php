@@ -83,6 +83,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Reservation::class)]
     private Collection $reservations;
 
+    /**
+     * @var Collection<int, Annonce>
+     */
+    #[ORM\ManyToMany(targetEntity: Annonce::class, inversedBy: 'favoris')]
+    private Collection $favoris;
+
 
     public function __construct()
     {
@@ -91,6 +97,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->receivedMessages = new ArrayCollection();
         $this->annonces = new ArrayCollection();
         $this->reservations = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -419,6 +426,33 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             if ($reservation->getUtilisateur() === $this) {
                 $reservation->setUtilisateur(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Annonce>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(Annonce $annonce): static
+    {
+        if (!$this->favoris->contains($annonce)) {
+            $this->favoris->add($annonce);
+            $annonce->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavori(Annonce $annonce): static
+    {
+        if ($this->favoris->removeElement($annonce)) {
+            $annonce->removeFavori($this);
         }
 
         return $this;

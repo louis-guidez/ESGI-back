@@ -55,11 +55,18 @@ class Annonce
     #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'annonces')]
     private Collection $categorie;
 
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'favoris')]
+    private Collection $favoris;
+
     public function __construct()
     {
         $this->photos = new ArrayCollection();
         $this->reservations = new ArrayCollection();
         $this->categorie = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -219,6 +226,33 @@ class Annonce
     public function removeCategorie(Categorie $categorie): static
     {
         $this->categorie->removeElement($categorie);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(Utilisateur $utilisateur): static
+    {
+        if (!$this->favoris->contains($utilisateur)) {
+            $this->favoris->add($utilisateur);
+            $utilisateur->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavori(Utilisateur $utilisateur): static
+    {
+        if ($this->favoris->removeElement($utilisateur)) {
+            $utilisateur->removeFavori($this);
+        }
 
         return $this;
     }
