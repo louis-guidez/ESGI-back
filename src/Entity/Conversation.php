@@ -21,15 +21,6 @@ class Conversation
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateCreation = null;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $participant1 = null;
-
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $participant2 = null;
-
-
     /**
      * @var Collection<int, Message>
      */
@@ -54,30 +45,6 @@ class Conversation
     public function setDateCreation(?\DateTime $dateCreation): static
     {
         $this->dateCreation = $dateCreation;
-
-        return $this;
-    }
-
-    public function getParticipant1(): ?Utilisateur
-    {
-        return $this->participant1;
-    }
-
-    public function setParticipant1(?Utilisateur $participant1): static
-    {
-        $this->participant1 = $participant1;
-
-        return $this;
-    }
-
-    public function getParticipant2(): ?Utilisateur
-    {
-        return $this->participant2;
-    }
-
-    public function setParticipant2(?Utilisateur $participant2): static
-    {
-        $this->participant2 = $participant2;
 
         return $this;
     }
