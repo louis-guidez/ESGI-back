@@ -3,9 +3,12 @@
 namespace App\Controller\Api;
 
 use App\Entity\Annonce;
+use App\Entity\Categorie;
 use App\Entity\Photo;
+use App\Entity\Utilisateur;
 use App\Repository\AnnonceRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,11 +35,16 @@ class AnnonceController extends AbstractController
                 $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
             }
 
+            $categories = [];
+            foreach ($annonce->getCategorie() as $categorie) {
+                $categories[] = $categorie->getLabel();
+            }
+
             $data[] = [
                 'id' => $annonce->getId(),
                 'titre' => $annonce->getTitre(),
                 'description' => $annonce->getDescription(),
-                'categorie' => $annonce->getCategorie(),
+                'categories' => $categories,
                 'prix' => $annonce->getPrix(),
                 'statut' => $annonce->getStatut(),
                 'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
@@ -62,6 +70,12 @@ class AnnonceController extends AbstractController
                     new OA\Property(property: 'statut', type: 'string'),
                     new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time'),
                     new OA\Property(
+                        property: 'categorieIds',
+                        type: 'array',
+                        items: new OA\Items(type: 'integer')
+                    ),
+                    new OA\Property(property: 'userId', type: 'integer'),
+                    new OA\Property(
                         property: 'photos',
                         type: 'array',
                         items: new OA\Items(type: 'string', format: 'binary')
@@ -71,7 +85,7 @@ class AnnonceController extends AbstractController
         )
     )]
     #[Route('/api/secure/annonces', name: 'api_annonces_new', methods: ['POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function new(Request $request, EntityManagerInterface $entityManager, Security $security): JsonResponse
     {
         $annonce = new Annonce();
         $annonce->setTitre($request->request->get('titre'));
@@ -81,6 +95,28 @@ class AnnonceController extends AbstractController
 
         if ($request->request->get('dateCreation')) {
             $annonce->setDateCreation(new \DateTime($request->request->get('dateCreation')));
+        }
+
+        $userId = $request->request->get('userId');
+        $utilisateur = null;
+        if ($userId) {
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($userId);
+        } else {
+            $utilisateur = $security->getUser();
+        }
+        if ($utilisateur instanceof Utilisateur) {
+            $annonce->setUtilisateur($utilisateur);
+        }
+
+        $categorieIds = $request->request->all('categorieIds');
+        if (!is_array($categorieIds)) {
+            $categorieIds = $categorieIds ? [$categorieIds] : [];
+        }
+        foreach ($categorieIds as $categorieId) {
+            $categorie = $entityManager->getRepository(Categorie::class)->find($categorieId);
+            if ($categorie) {
+                $annonce->addCategorie($categorie);
+            }
         }
 
         /** @var UploadedFile[] $files */
@@ -124,12 +160,14 @@ class AnnonceController extends AbstractController
                 new OA\Property(property: 'description', type: 'string'),
                 new OA\Property(property: 'prix', type: 'number', format: 'float'),
                 new OA\Property(property: 'statut', type: 'string'),
-                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'categorieIds', type: 'array', items: new OA\Items(type: 'integer')),
+                new OA\Property(property: 'userId', type: 'integer')
             ]
         )
     )]
     #[Route('/api/secure/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]
-    public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
+    public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce, Security $security): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -139,6 +177,25 @@ class AnnonceController extends AbstractController
         $annonce->setStatut($data['statut'] ?? $annonce->getStatut());
         if (isset($data['dateCreation'])) {
             $annonce->setDateCreation(new \DateTime($data['dateCreation']));
+        }
+
+        if (isset($data['userId'])) {
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($data['userId']);
+        } else {
+            $utilisateur = $security->getUser();
+        }
+        if ($utilisateur instanceof Utilisateur) {
+            $annonce->setUtilisateur($utilisateur);
+        }
+
+        if (isset($data['categorieIds']) && is_array($data['categorieIds'])) {
+            $annonce->getCategorie()->clear();
+            foreach ($data['categorieIds'] as $categorieId) {
+                $categorie = $entityManager->getRepository(Categorie::class)->find($categorieId);
+                if ($categorie) {
+                    $annonce->addCategorie($categorie);
+                }
+            }
         }
 
         $entityManager->flush();
