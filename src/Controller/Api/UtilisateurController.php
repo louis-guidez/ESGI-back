@@ -39,7 +39,7 @@ class UtilisateurController extends AbstractController
             ];
         }
 
-        return $this->json($utilisateurs);
+        return $this->json($data);
     }
 
     #[OA\Post(path: '/api/secure/utilisateurs', summary: 'Create utilisateur')]
@@ -104,7 +104,7 @@ class UtilisateurController extends AbstractController
             'pays' => $utilisateur->getPays(),
         ];
 
-        return $this->json($utilisateur, 201);
+        return $this->json($dataUser, 201);
     }
 
     #[OA\Put(path: '/api/secure/utilisateurs/{id}', summary: 'Edit utilisateur')]
@@ -187,7 +187,7 @@ class UtilisateurController extends AbstractController
             'pays' => $utilisateur->getPays(),
         ];
 
-        return $this->json($utilisateur);
+        return $this->json($dataUser);
     }
 
     #[OA\Delete(path: '/api/secure/utilisateurs/{id}', summary: 'Delete utilisateur')]
@@ -213,6 +213,6 @@ class UtilisateurController extends AbstractController
         $entityManager->remove($utilisateur);
         $entityManager->flush();
 
-        return $this->json($utilisateur);
+        return $this->json($data);
     }
 }
