@@ -20,6 +20,12 @@ class Message
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateEnvoi = null;
 
+    #[ORM\ManyToOne(inversedBy: 'messages')]
+    private ?Conversation $conversation = null;
+
+    #[ORM\ManyToOne]
+    private ?Utilisateur $author = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -45,6 +51,30 @@ class Message
     public function setDateEnvoi(?\DateTime $dateEnvoi): static
     {
         $this->dateEnvoi = $dateEnvoi;
+
+        return $this;
+    }
+
+    public function getConversation(): ?Conversation
+    {
+        return $this->conversation;
+    }
+
+    public function setConversation(?Conversation $conversation): static
+    {
+        $this->conversation = $conversation;
+
+        return $this;
+    }
+
+    public function getAuthor(): ?Utilisateur
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?Utilisateur $author): static
+    {
+        $this->author = $author;
 
         return $this;
     }
