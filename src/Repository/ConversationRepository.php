@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Conversation;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -14,6 +15,22 @@ class ConversationRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Conversation::class);
+    }
+
+    /**
+     * Find a conversation between two participants.
+     */
+    public function findByParticipants(Utilisateur $a, Utilisateur $b): ?Conversation
+    {
+        return $this->createQueryBuilder('c')
+            ->innerJoin('c.utilisateurConversations', 'ua')
+            ->innerJoin('c.utilisateurConversations', 'ub')
+            ->andWhere('ua.utilisateur = :a')
+            ->andWhere('ub.utilisateur = :b')
+            ->setParameter('a', $a)
+            ->setParameter('b', $b)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     //    /**
