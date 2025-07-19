@@ -18,12 +18,15 @@ class ConversationRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find a conversation where the given users are participants, regardless of order.
+     * Find a conversation between two participants.
      */
     public function findByParticipants(Utilisateur $a, Utilisateur $b): ?Conversation
     {
         return $this->createQueryBuilder('c')
-            ->where('(c.participant1 = :a AND c.participant2 = :b) OR (c.participant1 = :b AND c.participant2 = :a)')
+            ->innerJoin('c.utilisateurConversations', 'ua')
+            ->innerJoin('c.utilisateurConversations', 'ub')
+            ->andWhere('ua.utilisateur = :a')
+            ->andWhere('ub.utilisateur = :b')
             ->setParameter('a', $a)
             ->setParameter('b', $b)
             ->getQuery()
