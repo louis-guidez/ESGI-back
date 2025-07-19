@@ -9,7 +9,6 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Entity\UtilisateurConversation;
 use App\Entity\Message;
 use App\Entity\Annonce;
 use App\Entity\Reservation;
@@ -65,11 +64,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pays = null;
 
-    /**
-     * @var Collection<int, UtilisateurConversation>
-     */
-    #[ORM\OneToMany(targetEntity: UtilisateurConversation::class, mappedBy: 'utilisateur')]
-    private Collection $utilisateurConversations;
 
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
     private Collection $sentMessages;
@@ -92,7 +86,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-        $this->utilisateurConversations = new ArrayCollection();
         $this->sentMessages = new ArrayCollection();
         $this->receivedMessages = new ArrayCollection();
         $this->annonces = new ArrayCollection();
@@ -281,35 +274,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, UtilisateurConversation>
-     */
-    public function getUtilisateurConversations(): Collection
-    {
-        return $this->utilisateurConversations;
-    }
-
-    public function addUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
-    {
-        if (!$this->utilisateurConversations->contains($utilisateurConversation)) {
-            $this->utilisateurConversations->add($utilisateurConversation);
-            $utilisateurConversation->setUtilisateur($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
-    {
-        if ($this->utilisateurConversations->removeElement($utilisateurConversation)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurConversation->getUtilisateur() === $this) {
-                $utilisateurConversation->setUtilisateur(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Message>
