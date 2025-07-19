@@ -3,6 +3,8 @@
 namespace App\Controller\Api;
 
 use App\Entity\Reservation;
+use App\Entity\Annonce;
+use App\Entity\Utilisateur;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +30,8 @@ class ReservationController extends AbstractController
                 'dateDebut' => $reservation->getDateDebut()?->format('Y-m-d H:i:s'),
                 'dateFin' => $reservation->getDateFin()?->format('Y-m-d H:i:s'),
                 'statut' => $reservation->getStatut(),
+                'annonceId' => $reservation->getAnnonce()?->getId(),
+                'utilisateurId' => $reservation->getUtilisateur()?->getId(),
             ];
         }
 
@@ -42,7 +46,9 @@ class ReservationController extends AbstractController
             properties: [
                 new OA\Property(property: 'dateDebut', type: 'string', format: 'date-time'),
                 new OA\Property(property: 'dateFin', type: 'string', format: 'date-time'),
-                new OA\Property(property: 'statut', type: 'string')
+                new OA\Property(property: 'statut', type: 'string'),
+                new OA\Property(property: 'annonceId', type: 'integer'),
+                new OA\Property(property: 'utilisateurId', type: 'integer')
             ]
         )
     )]
@@ -60,10 +66,28 @@ class ReservationController extends AbstractController
         }
         $reservation->setStatut($data['statut'] ?? null);
 
+        if (isset($data['annonceId'])) {
+            $annonce = $entityManager->getRepository(Annonce::class)->find($data['annonceId']);
+            if ($annonce) {
+                $reservation->setAnnonce($annonce);
+            }
+        }
+
+        if (isset($data['utilisateurId'])) {
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($data['utilisateurId']);
+            if ($utilisateur) {
+                $reservation->setUtilisateur($utilisateur);
+            }
+        }
+
         $entityManager->persist($reservation);
         $entityManager->flush();
 
-        return $this->json(['id' => $reservation->getId()], 201);
+        return $this->json([
+            'id' => $reservation->getId(),
+            'annonceId' => $reservation->getAnnonce()?->getId(),
+            'utilisateurId' => $reservation->getUtilisateur()?->getId(),
+        ], 201);
     }
 
     #[OA\Put(path: '/api/reservations/{id}', summary: 'Edit reservation')]
@@ -74,7 +98,9 @@ class ReservationController extends AbstractController
             properties: [
                 new OA\Property(property: 'dateDebut', type: 'string', format: 'date-time'),
                 new OA\Property(property: 'dateFin', type: 'string', format: 'date-time'),
-                new OA\Property(property: 'statut', type: 'string')
+                new OA\Property(property: 'statut', type: 'string'),
+                new OA\Property(property: 'annonceId', type: 'integer'),
+                new OA\Property(property: 'utilisateurId', type: 'integer')
             ]
         )
     )]
@@ -91,9 +117,28 @@ class ReservationController extends AbstractController
         }
         $reservation->setStatut($data['statut'] ?? $reservation->getStatut());
 
+        if (isset($data['annonceId'])) {
+            $annonce = $entityManager->getRepository(Annonce::class)->find($data['annonceId']);
+            if ($annonce) {
+                $reservation->setAnnonce($annonce);
+            }
+        }
+
+        if (isset($data['utilisateurId'])) {
+            $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($data['utilisateurId']);
+            if ($utilisateur) {
+                $reservation->setUtilisateur($utilisateur);
+            }
+        }
+
         $entityManager->flush();
 
-        return $this->json(['status' => 'Reservation updated']);
+        return $this->json([
+            'id' => $reservation->getId(),
+            'annonceId' => $reservation->getAnnonce()?->getId(),
+            'utilisateurId' => $reservation->getUtilisateur()?->getId(),
+            'status' => 'Reservation updated',
+        ]);
     }
 
     #[OA\Delete(path: '/api/reservations/{id}', summary: 'Delete reservation')]
