@@ -27,6 +27,15 @@ class Conversation
     #[ORM\OneToMany(mappedBy: 'conversation', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $messages;
 
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(nullable: false)] // ou true selon ton besoin
+    private ?Utilisateur $utilisateurA = null;
+
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Utilisateur $utilisateurB = null;
+
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
@@ -76,6 +85,30 @@ class Conversation
                 $message->setConversation(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUtilisateurA(): ?Utilisateur
+    {
+        return $this->utilisateurA;
+    }
+
+    public function setUtilisateurA(?Utilisateur $utilisateurA): static
+    {
+        $this->utilisateurA = $utilisateurA;
+
+        return $this;
+    }
+
+    public function getUtilisateurB(): ?Utilisateur
+    {
+        return $this->utilisateurB;
+    }
+
+    public function setUtilisateurB(?Utilisateur $utilisateurB): static
+    {
+        $this->utilisateurB = $utilisateurB;
 
         return $this;
     }

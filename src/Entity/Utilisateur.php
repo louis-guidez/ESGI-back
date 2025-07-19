@@ -64,7 +64,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pays = null;
 
-
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
     private Collection $sentMessages;
 

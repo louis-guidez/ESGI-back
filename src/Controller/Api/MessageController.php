@@ -7,7 +7,7 @@ use App\Entity\Utilisateur;
 use App\Repository\MessageRepository;
 use App\Repository\ConversationRepository;
 use App\Entity\Conversation;
-use App\Entity\UtilisateurConversation;
+use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
@@ -69,28 +69,22 @@ class MessageController extends AbstractController
             return $this->json(['error' => 'Receiver not found'], 404);
         }
 
-        $conversation = $conversationRepository->findByParticipants($sender, $receiver);
-        if (!$conversation) {
-            $conversation = new Conversation();
-            $conversation->setDateCreation(new \DateTime());
-            $em->persist($conversation);
-
-            $uc1 = new UtilisateurConversation();
-            $uc1->setUtilisateur($sender);
-            $uc1->setConversation($conversation);
-            $em->persist($uc1);
-
-            $uc2 = new UtilisateurConversation();
-            $uc2->setUtilisateur($receiver);
-            $uc2->setConversation($conversation);
-            $em->persist($uc2);
-        }
-
         $message = new Message();
         $message->setContenu($contenu);
         $message->setSender($sender);
         $message->setReceiver($receiver);
         $message->setDateEnvoi(new \DateTime());
+
+        $conversation = $conversationRepository->findByParticipants($sender, $receiver);
+        if (!$conversation) {
+            $conversation = new Conversation();
+            $conversation->setDateCreation(new \DateTime());
+            $conversation->setUtilisateurA($sender);
+            $conversation->setDateCreation($receiver);
+            $conversation->addMessage($message);
+            $em->persist($conversation);
+        }
+
         $message->setConversation($conversation);
 
         $em->persist($message);
@@ -149,26 +143,34 @@ class MessageController extends AbstractController
     #[Route('/api/secure/messages/conversation/{id}', name: 'get_conversation_messages', methods: ['GET'])]
     public function getConversationMessages(
         int $id,
-        ConversationRepository $conversationRepository,
+        Security $security,
         UtilisateurRepository $utilisateurRepository,
-        Security $security
+        ConversationRepository $conversationRepository,
+        EntityManagerInterface $em,
     ): JsonResponse {
         $currentUser = $security->getUser();
 
-        $conversation = $conversationRepository->find($id);
-
-        if (!$conversation) {
-            $otherUser = $utilisateurRepository->find($id);
-            if (!$otherUser) {
-                return $this->json(['error' => 'Conversation not found'], 404);
-            }
-            $conversation = $conversationRepository->findByParticipants($currentUser, $otherUser);
-            if (!$conversation) {
-                return $this->json([]);
-            }
+        if (!$currentUser) {
+            return $this->json(['error' => 'Utilisateur non connecté'], 401);
         }
 
-        $messages = $conversation->getMessages();
+        $otherUser = $utilisateurRepository->find($id);
+        if (!$otherUser) {
+            return $this->json(['error' => 'Utilisateur introuvable'], 404);
+        }
+
+        $conversation = $conversationRepository->findByParticipants($currentUser, $otherUser);
+
+            if (!$conversation) {
+                $conversation = new Conversation();
+                $conversation->setDateCreation(new \DateTime());
+                $conversation->setUtilisateurA($currentUser);
+                $conversation->setUtilisateurB($otherUser);
+                $em->persist($conversation);
+                $em->flush();
+            }
+            $messages = $conversation->getMessages();
+
 
         $data = array_map(static function (Message $message) {
             return [
@@ -182,6 +184,7 @@ class MessageController extends AbstractController
 
         return $this->json($data);
     }
+
 
     #[OA\Put(path: '/api/secure/messages/{id}', summary: 'Edit message')]
     #[OA\Response(response: 200, description: 'Success')]
