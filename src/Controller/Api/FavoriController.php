@@ -52,4 +52,20 @@ class FavoriController extends AbstractController
 
         return $this->json(['status' => 'Annonce added to favoris'], 201);
     }
+
+    #[OA\Delete(path: '/api/secure/favoris/{id}', summary: 'Remove annonce from favoris')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[Route('/api/secure/favoris/{id}', name: 'api_favoris_delete', methods: ['DELETE'])]
+    public function delete(EntityManagerInterface $entityManager, Security $security, Annonce $annonce): JsonResponse
+    {
+        $user = $security->getUser();
+        if (!$user instanceof Utilisateur) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
+
+        $user->removeFavori($annonce);
+        $entityManager->flush();
+
+        return $this->json(['status' => 'Annonce removed from favoris']);
+    }
 }
