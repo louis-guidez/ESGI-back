@@ -7,8 +7,10 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Message;
+use App\Entity\Utilisateur;
 
 #[ORM\Entity(repositoryClass: ConversationRepository::class)]
+#[ORM\Table(uniqueConstraints: [new ORM\UniqueConstraint(name: 'UNIQ_PARTICIPANTS', columns: ['participant1_id', 'participant2_id'])])]
 class Conversation
 {
     #[ORM\Id]
@@ -20,12 +22,6 @@ class Conversation
     private ?\DateTime $dateCreation = null;
 
     /**
-     * @var Collection<int, UtilisateurConversation>
-     */
-    #[ORM\OneToMany(targetEntity: UtilisateurConversation::class, mappedBy: 'conversation')]
-    private Collection $utilisateurConversations;
-
-    /**
      * @var Collection<int, Message>
      */
     #[ORM\OneToMany(mappedBy: 'conversation', targetEntity: Message::class, orphanRemoval: true)]
@@ -33,7 +29,6 @@ class Conversation
 
     public function __construct()
     {
-        $this->utilisateurConversations = new ArrayCollection();
         $this->messages = new ArrayCollection();
     }
 
@@ -54,35 +49,6 @@ class Conversation
         return $this;
     }
 
-    /**
-     * @return Collection<int, UtilisateurConversation>
-     */
-    public function getUtilisateurConversations(): Collection
-    {
-        return $this->utilisateurConversations;
-    }
-
-    public function addUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
-    {
-        if (!$this->utilisateurConversations->contains($utilisateurConversation)) {
-            $this->utilisateurConversations->add($utilisateurConversation);
-            $utilisateurConversation->setConversation($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
-    {
-        if ($this->utilisateurConversations->removeElement($utilisateurConversation)) {
-            // set the owning side to null (unless already changed)
-            if ($utilisateurConversation->getConversation() === $this) {
-                $utilisateurConversation->setConversation(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Message>

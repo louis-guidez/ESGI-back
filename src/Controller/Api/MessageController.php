@@ -148,13 +148,27 @@ class MessageController extends AbstractController
 
     #[Route('/api/secure/messages/conversation/{id}', name: 'get_conversation_messages', methods: ['GET'])]
     public function getConversationMessages(
-        Utilisateur $id,
-        MessageRepository $repository,
+        int $id,
+        ConversationRepository $conversationRepository,
+        UtilisateurRepository $utilisateurRepository,
         Security $security
     ): JsonResponse {
         $currentUser = $security->getUser();
 
-        $messages = $repository->findConversationMessages($currentUser, $id);
+        $conversation = $conversationRepository->find($id);
+
+        if (!$conversation) {
+            $otherUser = $utilisateurRepository->find($id);
+            if (!$otherUser) {
+                return $this->json(['error' => 'Conversation not found'], 404);
+            }
+            $conversation = $conversationRepository->findByParticipants($currentUser, $otherUser);
+            if (!$conversation) {
+                return $this->json([]);
+            }
+        }
+
+        $messages = $conversation->getMessages();
 
         $data = array_map(static function (Message $message) {
             return [
@@ -164,7 +178,7 @@ class MessageController extends AbstractController
                 'to' => $message->getReceiver()?->getId(),
                 'date' => $message->getDateEnvoi()?->format('Y-m-d H:i'),
             ];
-        }, $messages);
+        }, $messages->toArray());
 
         return $this->json($data);
     }
