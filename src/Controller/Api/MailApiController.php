@@ -38,7 +38,7 @@ class MailApiController extends AbstractController
         return new Response('✅ Mail envoyé !');
     }
 
-    #[OA\Post(path: '/api/mail/send', summary: 'Send a custom email with image')]
+    #[OA\Post(path: '/api/secure/mail/send', summary: 'Send a custom email with image')]
     #[OA\RequestBody(
         required: true,
         content: new OA\JsonContent(
@@ -52,7 +52,7 @@ class MailApiController extends AbstractController
         )
     )]
     #[OA\Response(response: 200, description: 'Mail sent successfully')]
-    #[Route('/api/mail/send', name: 'api_mail_send', methods: ['POST'])]
+    #[Route('/api/secure/mail/send', name: 'api_mail_send', methods: ['POST'])]
     public function sendMail(Request $request, MailerInterface $mailer): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
