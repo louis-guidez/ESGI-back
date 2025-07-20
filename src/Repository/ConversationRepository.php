@@ -32,6 +32,17 @@ class ConversationRepository extends ServiceEntityRepository
 
     }
 
+    public function findByUser(Utilisateur $user): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.utilisateurA = :user OR c.utilisateurB = :user')
+            ->setParameter('user', $user)
+            ->orderBy('c.dateCreation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
     //    /**
     //     * @return Conversation[] Returns an array of Conversation objects
     //     */
