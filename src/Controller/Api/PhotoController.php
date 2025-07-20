@@ -39,7 +39,7 @@ class PhotoController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Post(path: '/api/photos', summary: 'Create photo')]
+    #[OA\Post(path: '/api/secure/photos', summary: 'Create photo')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
         required: true,
@@ -54,7 +54,7 @@ class PhotoController extends AbstractController
             )
         )
     )]
-    #[Route('/api/photos', name: 'api_photos_new', methods: ['POST'])]
+    #[Route('/api/secure/photos', name: 'api_photos_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $photo = new Photo();
@@ -75,7 +75,7 @@ class PhotoController extends AbstractController
         return $this->json(['id' => $photo->getId()], 201);
     }
 
-    #[OA\Put(path: '/api/photos/{id}', summary: 'Edit photo')]
+    #[OA\Put(path: '/api/secure/photos/{id}', summary: 'Edit photo')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
         required: true,
@@ -90,7 +90,7 @@ class PhotoController extends AbstractController
             )
         )
     )]
-    #[Route('/api/photos/{id}', name: 'api_photos_edit', methods: ['PUT'])]
+    #[Route('/api/secure/photos/{id}', name: 'api_photos_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Photo $photo): JsonResponse
     {
         /** @var UploadedFile|null $file */
@@ -108,9 +108,9 @@ class PhotoController extends AbstractController
         return $this->json(['status' => 'Photo updated']);
     }
 
-    #[OA\Delete(path: '/api/photos/{id}', summary: 'Delete photo')]
+    #[OA\Delete(path: '/api/secure/photos/{id}', summary: 'Delete photo')]
     #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/photos/{id}', name: 'api_photos_delete', methods: ['DELETE'])]
+    #[Route('/api/secure/photos/{id}', name: 'api_photos_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Photo $photo): JsonResponse
     {
         $entityManager->remove($photo);
