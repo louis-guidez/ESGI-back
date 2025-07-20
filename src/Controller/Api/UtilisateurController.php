@@ -192,7 +192,7 @@ class UtilisateurController extends AbstractController
 
     #[OA\Delete(path: '/api/secure/utilisateurs/{id}', summary: 'Delete utilisateur')]
     #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/utilisateurs/{id}', name: 'api_utilisateurs_delete', methods: ['DELETE'])]
+    #[Route('/api/secure/utilisateurs/{id}', name: 'api_utilisateurs_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Utilisateur $utilisateur): JsonResponse
     {
         $data[] = [
