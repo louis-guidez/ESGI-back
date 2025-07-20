@@ -52,7 +52,8 @@ class ReservationController extends AbstractController
                 new OA\Property(property: 'dateFin', type: 'string', format: 'date-time'),
                 new OA\Property(property: 'statut', type: 'string'),
                 new OA\Property(property: 'annonceId', type: 'integer'),
-                new OA\Property(property: 'utilisateurId', type: 'integer')
+                new OA\Property(property: 'utilisateurId', type: 'integer'),
+                new OA\Property(property: 'stripeIntentId', type: 'string', nullable: true)
             ]
         )
     )]
@@ -63,6 +64,17 @@ class ReservationController extends AbstractController
 
         Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
 
+        $annonce = null;
+        if (isset($data['annonceId'])) {
+            $annonce = $entityManager->getRepository(Annonce::class)->find($data['annonceId']);
+        }
+
+        if (!$annonce) {
+            return $this->json(['error' => 'Annonce not found'], 404);
+        }
+
+        $amountCreate = (int) round(((float) ($annonce->getPrix() ?? 0)) * 100);
+
         $intentId = $data['stripeIntentId'] ?? null;
         $paymentIntent = null;
 
@@ -70,7 +82,6 @@ class ReservationController extends AbstractController
             if ($intentId) {
                 $paymentIntent = PaymentIntent::retrieve($intentId);
             } else {
-                $amountCreate = isset($data['amount']) ? (int) $data['amount'] : 0;
                 $paymentIntent = PaymentIntent::create([
                     'amount' => $amountCreate,
                     'currency' => 'eur',
@@ -96,12 +107,7 @@ class ReservationController extends AbstractController
         }
         $reservation->setStatut($data['statut'] ?? null);
 
-        if (isset($data['annonceId'])) {
-            $annonce = $entityManager->getRepository(Annonce::class)->find($data['annonceId']);
-            if ($annonce) {
-                $reservation->setAnnonce($annonce);
-            }
-        }
+        $reservation->setAnnonce($annonce);
 
         if (isset($data['utilisateurId'])) {
             $utilisateur = $entityManager->getRepository(Utilisateur::class)->find($data['utilisateurId']);
