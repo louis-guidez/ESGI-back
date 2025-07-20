@@ -9,4 +9,4 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Commande au démarrage du conteneur
-CMD composer install --no-interaction && php bin/console doctrine:migrations:migrate --no-interaction && php -S 0.0.0.0:8000 -t public
+CMD composer install --no-interaction &&  php bin/console make:migration --no-interaction && php bin/console doctrine:migrations:migrate --no-interaction && php -S 0.0.0.0:8000 -t public
