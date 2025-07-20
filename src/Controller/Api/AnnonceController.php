@@ -247,7 +247,7 @@ class AnnonceController extends AbstractController
 
     #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Delete annonce')]
     #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/annonces/{id}', name: 'api_annonces_delete', methods: ['DELETE'])]
+    #[Route('/api/secure/annonces/{id}', name: 'api_annonces_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {
         $entityManager->remove($annonce);
