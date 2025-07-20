@@ -43,8 +43,8 @@ class ConversationController extends AbstractController
                     'prenom' => $otherUser->getPrenom(),
                     'email' => $otherUser->getEmail(),
                 ],
-                'lastMessage' => $conversation->getMessages()->last()?->getContenu(),
-                'lastDate' => $conversation->getMessages()->last()?->getDateEnvoi()?->format('Y-m-d H:i'),
+//                'lastMessage' => $conversation->getMessages()->last()?->getContenu(),
+//                'lastDate' => $conversation->getMessages()->last()?->getDateEnvoi()?->format('Y-m-d H:i'),
             ];
         }, $conversations);
 
