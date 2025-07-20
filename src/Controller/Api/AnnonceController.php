@@ -54,6 +54,9 @@ class AnnonceController extends AbstractController
                         'prenom' => $annonce->getUtilisateur()->getPrenom(),
                         'nom' => $annonce->getUtilisateur()->getNom(),
                         'email' => $annonce->getUtilisateur()->getEmail(),
+                        'adresse' => $annonce->getUtilisateur()->getAdresse(),
+                        'postalCode' => $annonce->getUtilisateur()->getPostalCode(),
+                        'ville' => $annonce->getUtilisateur()->getVille(),
                     ],
                 ];
         }
