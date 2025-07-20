@@ -21,11 +21,17 @@ use OpenApi\Attributes as OA;
 class AnnonceController extends AbstractController
 {
     #[OA\Get(path: '/api/annonces', summary: 'List annonces')]
+    #[OA\Parameter(name: 'q', in: 'query', description: 'Search term', required: false, schema: new OA\Schema(type: 'string'))]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/annonces', name: 'api_annonces', methods: ['GET'])]
-    public function index(AnnonceRepository $annonceRepository, ParameterBagInterface $params): JsonResponse
+    public function index(Request $request, AnnonceRepository $annonceRepository, ParameterBagInterface $params): JsonResponse
     {
-        $annonces = $annonceRepository->findAll();
+        $search = $request->query->get('q');
+        if ($search) {
+            $annonces = $annonceRepository->searchByTerm($search);
+        } else {
+            $annonces = $annonceRepository->findAll();
+        }
         $endpoint = rtrim($params->get('minio_endpoint'), '/'); // évite les //
 
         $data = [];

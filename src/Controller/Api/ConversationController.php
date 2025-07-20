@@ -15,7 +15,7 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Conversation')]
 class ConversationController extends AbstractController
 {
-    #[OA\Get(path: '/api/secure/conversations', summary: 'Create conversation')]
+    #[OA\Get(path: '/api/secure/conversations', summary: 'getAllConversations')]
     #[Route('/api/secure/conversations', name: 'get_all_conversations', methods: ['GET'])]
     public function getAllConversations(
         Security $security,
@@ -29,6 +29,21 @@ class ConversationController extends AbstractController
 
         // Récupère toutes les conversations où l'utilisateur est A ou B
         $conversations = $conversationRepository->findByUser($currentUser);
+
+        // Filtre les conversations dupliquées (participants inversés)
+        $uniqueConversations = [];
+        $seen = [];
+        foreach ($conversations as $conversation) {
+            $idA = $conversation->getUtilisateurA()->getId();
+            $idB = $conversation->getUtilisateurB()->getId();
+            $key = $idA < $idB ? $idA . '-' . $idB : $idB . '-' . $idA;
+
+            if (!isset($seen[$key])) {
+                $seen[$key] = true;
+                $uniqueConversations[] = $conversation;
+            }
+        }
+
 
         $data = array_map(static function (Conversation $conversation) use ($currentUser) {
             $otherUser = $conversation->getUtilisateurA() === $currentUser
@@ -46,7 +61,7 @@ class ConversationController extends AbstractController
 //                'lastMessage' => $conversation->getMessages()->last()?->getContenu(),
 //                'lastDate' => $conversation->getMessages()->last()?->getDateEnvoi()?->format('Y-m-d H:i'),
             ];
-        }, $conversations);
+        }, $uniqueConversations);
 
         return $this->json($data);
     }

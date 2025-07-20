@@ -16,6 +16,24 @@ class AnnonceRepository extends ServiceEntityRepository
         parent::__construct($registry, Annonce::class);
     }
 
+    /**
+     * Search annonces by a string contained in titre or description or category label.
+     *
+     * @param string $term Search term
+     * @return Annonce[]
+     */
+    public function searchByTerm(string $term): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.categorie', 'c')
+            ->addSelect('c')
+            ->andWhere('LOWER(a.titre) LIKE :t OR LOWER(a.description) LIKE :t OR LOWER(c.label) LIKE :t')
+            ->setParameter('t', '%' . strtolower($term) . '%')
+            ->orderBy('a.id', 'DESC');
+
+        return $qb->getQuery()->getResult();
+    }
+
     //    /**
     //     * @return Annonce[] Returns an array of Annonce objects
     //     */
