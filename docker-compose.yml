@@ -26,6 +26,7 @@ services:
     depends_on:
       - db
       - minio
+      - mercure
     environment:
       APP_ENV: ${APP_ENV}
       APP_DEBUG: ${APP_DEBUG}
@@ -43,7 +44,13 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN}
       MAILER_DSN: ${MAILER_DSN}
-    command: php -S 0.0.0.0:8000 -t public
+      MERCURE_URL: ${MERCURE_URL}
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_SECRET}
+      MERCURE_ALLOWED_ORIGINS: ${MERCURE_ALLOWED_ORIGINS}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
 
   init-minio:
     image: minio/mc
@@ -75,6 +82,28 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/prod/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+  mercure:
+    image: dunglas/mercure
+    container_name: mercure
+    restart: unless-stopped
+    ports:
+      - "3001:80"  # Seul ce port est nécessaire, inutile d'exposer deux fois "80"
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: "${MERCURE_JWT_SECRET}"
+      MERCURE_SUBSCRIBER_JWT_KEY: "${MERCURE_JWT_SECRET}"
+      MERCURE_PUBLISH_ALLOWED_ORIGINS: "${MERCURE_ALLOWED_ORIGINS}"
+      MERCURE_SUBSCRIBE_ALLOWED_ORIGINS: "${MERCURE_ALLOWED_ORIGINS}"
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins *
+        anonymous
+    command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
+    volumes:
+      - mercure_data:/data
+      - mercure_config:/config
+
 volumes:
   db_data:
   minio_data:
+  mercure_data:
+  mercure_config:

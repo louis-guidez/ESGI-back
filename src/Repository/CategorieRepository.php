@@ -2,38 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Conversation;
-use App\Entity\Utilisateur;
+use App\Entity\Categorie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Conversation>
+ * @extends ServiceEntityRepository<Categorie>
  */
-class ConversationRepository extends ServiceEntityRepository
+class CategorieRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Conversation::class);
-    }
-
-    /**
-     * @return Conversation[] Returns an array of Conversation objects
-     */
-    public function findByParticipants(Utilisateur $a, Utilisateur $b): ?Conversation
-    {
-        return $this->createQueryBuilder('c')
-            ->where('(c.utilisateurA = :a AND c.utilisateurB = :b)')
-            ->orWhere('(c.utilisateurA = :b AND c.utilisateurB = :a)')
-            ->setParameter('a', $a)
-            ->setParameter('b', $b)
-            ->getQuery()
-            ->getOneOrNullResult();
-
+        parent::__construct($registry, Categorie::class);
     }
 
     //    /**
-    //     * @return Conversation[] Returns an array of Conversation objects
+    //     * @return Categorie[] Returns an array of Categorie objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -47,7 +31,7 @@ class ConversationRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Conversation
+    //    public function findOneBySomeField($value): ?Categorie
     //    {
     //        return $this->createQueryBuilder('c')
     //            ->andWhere('c.exampleField = :val')

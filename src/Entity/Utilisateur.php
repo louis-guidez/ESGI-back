@@ -9,6 +9,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use App\Entity\Message;
+use App\Entity\Annonce;
+use App\Entity\Reservation;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -61,15 +64,32 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $pays = null;
 
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
+    private Collection $sentMessages;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Message::class)]
+    private Collection $receivedMessages;
+
+    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Annonce::class)]
+    private Collection $annonces;
+
+    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Reservation::class)]
+    private Collection $reservations;
+
     /**
-     * @var Collection<int, UtilisateurConversation>
+     * @var Collection<int, Annonce>
      */
-    #[ORM\OneToMany(targetEntity: UtilisateurConversation::class, mappedBy: 'utilisateur')]
-    private Collection $utilisateurConversations;
+    #[ORM\ManyToMany(targetEntity: Annonce::class, inversedBy: 'favoris')]
+    private Collection $favoris;
+
 
     public function __construct()
     {
-        $this->utilisateurConversations = new ArrayCollection();
+        $this->sentMessages = new ArrayCollection();
+        $this->receivedMessages = new ArrayCollection();
+        $this->annonces = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -253,31 +273,149 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+
     /**
-     * @return Collection<int, UtilisateurConversation>
+     * @return Collection<int, Message>
      */
-    public function getUtilisateurConversations(): Collection
+    public function getSentMessages(): Collection
     {
-        return $this->utilisateurConversations;
+        return $this->sentMessages;
     }
 
-    public function addUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
+    public function addSentMessage(Message $message): static
     {
-        if (!$this->utilisateurConversations->contains($utilisateurConversation)) {
-            $this->utilisateurConversations->add($utilisateurConversation);
-            $utilisateurConversation->setUtilisateur($this);
+        if (!$this->sentMessages->contains($message)) {
+            $this->sentMessages->add($message);
+            $message->setSender($this);
         }
 
         return $this;
     }
 
-    public function removeUtilisateurConversation(UtilisateurConversation $utilisateurConversation): static
+    public function removeSentMessage(Message $message): static
     {
-        if ($this->utilisateurConversations->removeElement($utilisateurConversation)) {
+        if ($this->sentMessages->removeElement($message)) {
             // set the owning side to null (unless already changed)
-            if ($utilisateurConversation->getUtilisateur() === $this) {
-                $utilisateurConversation->setUtilisateur(null);
+            if ($message->getSender() === $this) {
+                $message->setSender(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getReceivedMessages(): Collection
+    {
+        return $this->receivedMessages;
+    }
+
+    public function addReceivedMessage(Message $message): static
+    {
+        if (!$this->receivedMessages->contains($message)) {
+            $this->receivedMessages->add($message);
+            $message->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceivedMessage(Message $message): static
+    {
+        if ($this->receivedMessages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getReceiver() === $this) {
+                $message->setReceiver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Annonce>
+     */
+    public function getAnnonces(): Collection
+    {
+        return $this->annonces;
+    }
+
+    public function addAnnonce(Annonce $annonce): static
+    {
+        if (!$this->annonces->contains($annonce)) {
+            $this->annonces->add($annonce);
+            $annonce->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnnonce(Annonce $annonce): static
+    {
+        if ($this->annonces->removeElement($annonce)) {
+            // set the owning side to null (unless already changed)
+            if ($annonce->getUtilisateur() === $this) {
+                $annonce->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getUtilisateur() === $this) {
+                $reservation->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Annonce>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(Annonce $annonce): static
+    {
+        if (!$this->favoris->contains($annonce)) {
+            $this->favoris->add($annonce);
+            $annonce->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavori(Annonce $annonce): static
+    {
+        if ($this->favoris->removeElement($annonce)) {
+            $annonce->removeFavori($this);
         }
 
         return $this;

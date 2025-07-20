@@ -9,9 +9,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use OpenApi\Attributes as OA;
 
+#[OA\Tag(name: 'Conversation')]
 class ConversationController extends AbstractController
 {
+    #[OA\Get(path: '/api/conversations', summary: 'List conversations')]
+    #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/conversations', name: 'api_conversations', methods: ['GET'])]
     public function index(ConversationRepository $conversationRepository): JsonResponse
     {
@@ -28,7 +32,17 @@ class ConversationController extends AbstractController
         return $this->json($data);
     }
 
-    #[Route('/api/conversations', name: 'api_conversations_new', methods: ['POST'])]
+    #[OA\Post(path: '/api/secure/conversations', summary: 'Create conversation')]
+    #[OA\Response(response: 201, description: 'Created')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
+    #[Route('/api/secure/conversations', name: 'api_conversations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -44,7 +58,17 @@ class ConversationController extends AbstractController
         return $this->json(['id' => $conversation->getId()], 201);
     }
 
-    #[Route('/api/conversations/{id}', name: 'api_conversations_edit', methods: ['PUT'])]
+    #[OA\Put(path: '/api/secure/conversations/{id}', summary: 'Edit conversation')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[OA\RequestBody(
+        content: new OA\JsonContent(
+            type: 'object',
+            properties: [
+                new OA\Property(property: 'dateCreation', type: 'string', format: 'date-time')
+            ]
+        )
+    )]
+    #[Route('/api/secure/conversations/{id}', name: 'api_conversations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -58,7 +82,9 @@ class ConversationController extends AbstractController
         return $this->json(['status' => 'Conversation updated']);
     }
 
-    #[Route('/api/conversations/{id}', name: 'api_conversations_delete', methods: ['DELETE'])]
+    #[OA\Delete(path: '/api/secure/conversations/{id}', summary: 'Delete conversation')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[Route('/api/secure/conversations/{id}', name: 'api_conversations_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
         $entityManager->remove($conversation);

@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\AnnonceRepository;
 use App\Entity\Photo;
+use App\Entity\Reservation;
+use App\Entity\Utilisateur;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -32,15 +34,39 @@ class Annonce
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateCreation = null;
 
+    #[ORM\ManyToOne(inversedBy: 'annonces')]
+    private ?Utilisateur $utilisateur = null;
+
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(mappedBy: 'annonce', targetEntity: Reservation::class)]
+    private Collection $reservations;
+
     /**
      * @var Collection<int, Photo>
      */
     #[ORM\OneToMany(targetEntity: Photo::class, mappedBy: 'annonce')]
     private Collection $photos;
 
+    /**
+     * @var Collection<int, Categorie>
+     */
+    #[ORM\ManyToMany(targetEntity: Categorie::class, inversedBy: 'annonces')]
+    private Collection $categorie;
+
+    /**
+     * @var Collection<int, Utilisateur>
+     */
+    #[ORM\ManyToMany(targetEntity: Utilisateur::class, mappedBy: 'favoris')]
+    private Collection $favoris;
+
     public function __construct()
     {
         $this->photos = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
+        $this->categorie = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -133,6 +159,99 @@ class Annonce
             if ($photo->getAnnonce() === $this) {
                 $photo->setAnnonce(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setAnnonce($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getAnnonce() === $this) {
+                $reservation->setAnnonce(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Categorie>
+     */
+    public function getCategorie(): Collection
+    {
+        return $this->categorie;
+    }
+
+    public function addCategorie(Categorie $categorie): static
+    {
+        if (!$this->categorie->contains($categorie)) {
+            $this->categorie->add($categorie);
+        }
+
+        return $this;
+    }
+
+    public function removeCategorie(Categorie $categorie): static
+    {
+        $this->categorie->removeElement($categorie);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Utilisateur>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(Utilisateur $utilisateur): static
+    {
+        if (!$this->favoris->contains($utilisateur)) {
+            $this->favoris->add($utilisateur);
+            $utilisateur->addFavori($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFavori(Utilisateur $utilisateur): static
+    {
+        if ($this->favoris->removeElement($utilisateur)) {
+            $utilisateur->removeFavori($this);
         }
 
         return $this;
