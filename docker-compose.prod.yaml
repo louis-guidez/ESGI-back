@@ -44,8 +44,8 @@ services:
     container_name: ESGI-pa-back
     image: ghcr.io/louis-guidez/esgi-pa-back
     volumes:
-      - ./config/jwt/private.pem:/config/jwt/private.pem
-      - ./config/jwt/public.pem:/config/jwt/public.pem
+      - ./config/jwt/private.pem:/var/www/html/config/jwt/private.pem
+      - ./config/jwt/public.pem:/var/www/html/config/jwt/public.pem
     environment:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET}
