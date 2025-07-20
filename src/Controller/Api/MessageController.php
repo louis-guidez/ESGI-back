@@ -80,7 +80,7 @@ class MessageController extends AbstractController
             $conversation = new Conversation();
             $conversation->setDateCreation(new \DateTime());
             $conversation->setUtilisateurA($sender);
-            $conversation->setDateCreation($receiver);
+            $conversation->setUtilisateurB($receiver);
             $conversation->addMessage($message);
             $em->persist($conversation);
         }
