@@ -3,12 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\ConversationRepository;
-use App\Entity\Message;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Message;
-use App\Entity\Utilisateur;
 
 #[ORM\Entity(repositoryClass: ConversationRepository::class)]
 #[ORM\Table(uniqueConstraints: [new ORM\UniqueConstraint(name: 'UNIQ_PARTICIPANTS', columns: ['participant1_id', 'participant2_id'])])]
@@ -36,13 +34,6 @@ class Conversation
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateurB = null;
 
-
-    /**
-     * @var Collection<int, Message>
-     */
-    #[ORM\OneToMany(mappedBy: 'conversation', targetEntity: Message::class)]
-    private Collection $messages;
-
     public function __construct()
     {
         $this->messages = new ArrayCollection();
@@ -64,7 +55,6 @@ class Conversation
 
         return $this;
     }
-
 
     /**
      * @return Collection<int, Message>
