@@ -14,10 +14,10 @@ use OpenApi\Attributes as OA;
 #[OA\Tag(name: 'Transaction')]
 class TransactionController extends AbstractController
 {
-    #[OA\Get(path: '/api/transactions/user/{id}', summary: 'List transactions by user')]
+    #[OA\Get(path: '/api/secure/transactions/user/{id}', summary: 'List transactions by user')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\Response(response: 404, description: 'Not found')]
-    #[Route('/api/transactions/user/{id}', name: 'api_transactions_user', methods: ['GET'])]
+    #[Route('/api/secure/transactions/user/{id}', name: 'api_transactions_user', methods: ['GET'])]
     public function byUser(int $id, UtilisateurRepository $utilisateurRepository, TransactionRepository $transactionRepository): JsonResponse
     {
         $utilisateur = $utilisateurRepository->find($id);
@@ -43,10 +43,10 @@ class TransactionController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Get(path: '/api/transactions/reservation/{id}', summary: 'List transactions by reservation')]
+    #[OA\Get(path: '/api/secure/transactions/reservation/{id}', summary: 'List transactions by reservation')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\Response(response: 404, description: 'Not found')]
-    #[Route('/api/transactions/reservation/{id}', name: 'api_transactions_reservation', methods: ['GET'])]
+    #[Route('/api/secure/transactions/reservation/{id}', name: 'api_transactions_reservation', methods: ['GET'])]
     public function byReservation(int $id, ReservationRepository $reservationRepository, TransactionRepository $transactionRepository): JsonResponse
     {
         $reservation = $reservationRepository->find($id);
