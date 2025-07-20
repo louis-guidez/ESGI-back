@@ -51,7 +51,6 @@ services:
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
-    command: php -S 0.0.0.0:8000 -t public
 
   init-minio:
     image: minio/mc
