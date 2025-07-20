@@ -42,7 +42,7 @@ class ReservationController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Post(path: '/api/reservations', summary: 'Create reservation')]
+    #[OA\Post(path: '/api/secure/reservations', summary: 'Create reservation')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -56,7 +56,7 @@ class ReservationController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/reservations', name: 'api_reservations_new', methods: ['POST'])]
+    #[Route('/api/secure/reservations', name: 'api_reservations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -141,7 +141,7 @@ class ReservationController extends AbstractController
         ], 201);
     }
 
-    #[OA\Put(path: '/api/reservations/{id}', summary: 'Edit reservation')]
+    #[OA\Put(path: '/api/secure/reservations/{id}', summary: 'Edit reservation')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -155,7 +155,7 @@ class ReservationController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/reservations/{id}', name: 'api_reservations_edit', methods: ['PUT'])]
+    #[Route('/api/secure/reservations/{id}', name: 'api_reservations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -192,9 +192,9 @@ class ReservationController extends AbstractController
         ]);
     }
 
-    #[OA\Delete(path: '/api/reservations/{id}', summary: 'Delete reservation')]
+    #[OA\Delete(path: '/api/secure/reservations/{id}', summary: 'Delete reservation')]
     #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/reservations/{id}', name: 'api_reservations_delete', methods: ['DELETE'])]
+    #[Route('/api/secure/reservations/{id}', name: 'api_reservations_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
     {
         $entityManager->remove($reservation);
