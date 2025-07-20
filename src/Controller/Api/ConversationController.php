@@ -32,7 +32,7 @@ class ConversationController extends AbstractController
         return $this->json($data);
     }
 
-    #[OA\Post(path: '/api/conversations', summary: 'Create conversation')]
+    #[OA\Post(path: '/api/secure/conversations', summary: 'Create conversation')]
     #[OA\Response(response: 201, description: 'Created')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -42,7 +42,7 @@ class ConversationController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/conversations', name: 'api_conversations_new', methods: ['POST'])]
+    #[Route('/api/secure/conversations', name: 'api_conversations_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -58,7 +58,7 @@ class ConversationController extends AbstractController
         return $this->json(['id' => $conversation->getId()], 201);
     }
 
-    #[OA\Put(path: '/api/conversations/{id}', summary: 'Edit conversation')]
+    #[OA\Put(path: '/api/secure/conversations/{id}', summary: 'Edit conversation')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
         content: new OA\JsonContent(
@@ -68,7 +68,7 @@ class ConversationController extends AbstractController
             ]
         )
     )]
-    #[Route('/api/conversations/{id}', name: 'api_conversations_edit', methods: ['PUT'])]
+    #[Route('/api/secure/conversations/{id}', name: 'api_conversations_edit', methods: ['PUT'])]
     public function edit(Request $request, EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -82,9 +82,9 @@ class ConversationController extends AbstractController
         return $this->json(['status' => 'Conversation updated']);
     }
 
-    #[OA\Delete(path: '/api/conversations/{id}', summary: 'Delete conversation')]
+    #[OA\Delete(path: '/api/secure/conversations/{id}', summary: 'Delete conversation')]
     #[OA\Response(response: 200, description: 'Success')]
-    #[Route('/api/conversations/{id}', name: 'api_conversations_delete', methods: ['DELETE'])]
+    #[Route('/api/secure/conversations/{id}', name: 'api_conversations_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Conversation $conversation): JsonResponse
     {
         $entityManager->remove($conversation);
