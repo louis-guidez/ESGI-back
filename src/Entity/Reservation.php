@@ -30,6 +30,9 @@ class Reservation
     #[ORM\ManyToOne(inversedBy: 'reservations')]
     private ?Utilisateur $utilisateur = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $stripeAmount = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +94,18 @@ class Reservation
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
+
+        return $this;
+    }
+
+    public function getStripeAmount(): ?float
+    {
+        return $this->stripeAmount;
+    }
+
+    public function setStripeAmount(float $stripeAmount): static
+    {
+        $this->stripeAmount = $stripeAmount;
 
         return $this;
     }

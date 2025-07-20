@@ -32,6 +32,7 @@ class ReservationController extends AbstractController
                 'statut' => $reservation->getStatut(),
                 'annonceId' => $reservation->getAnnonce()?->getId(),
                 'utilisateurId' => $reservation->getUtilisateur()?->getId(),
+                'stripeAmount' => $reservation->getStripeAmount()
             ];
         }
 
