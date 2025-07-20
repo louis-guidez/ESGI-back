@@ -94,6 +94,12 @@ class AnnonceController extends AbstractController
             'statut' => $annonce->getStatut(),
             'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
             'photos' => $photos,
+            'user' => [
+                'id' => $annonce->getUtilisateur()->getId(),
+                'prenom' => $annonce->getUtilisateur()->getPrenom(),
+                'nom' => $annonce->getUtilisateur()->getNom(),
+                'email' => $annonce->getUtilisateur()->getEmail(),
+            ],
         ];
 
         return $this->json($data);
