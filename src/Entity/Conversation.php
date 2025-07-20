@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ConversationRepository;
+use App\Entity\Message;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -35,6 +36,12 @@ class Conversation
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateurB = null;
 
+
+    /**
+     * @var Collection<int, Message>
+     */
+    #[ORM\OneToMany(mappedBy: 'conversation', targetEntity: Message::class)]
+    private Collection $messages;
 
     public function __construct()
     {

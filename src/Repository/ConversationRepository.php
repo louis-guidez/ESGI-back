@@ -32,7 +32,6 @@ class ConversationRepository extends ServiceEntityRepository
 
     }
 
-
     //    /**
     //     * @return Conversation[] Returns an array of Conversation objects
     //     */
