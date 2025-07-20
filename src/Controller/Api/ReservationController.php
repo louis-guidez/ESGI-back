@@ -5,9 +5,12 @@ namespace App\Controller\Api;
 use App\Entity\Reservation;
 use App\Entity\Annonce;
 use App\Entity\Utilisateur;
+use App\Entity\Transaction;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Stripe\Stripe;
+use Stripe\PaymentIntent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -58,6 +61,32 @@ class ReservationController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
+        Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
+
+        $intentId = $data['stripeIntentId'] ?? null;
+        $paymentIntent = null;
+
+        try {
+            if ($intentId) {
+                $paymentIntent = PaymentIntent::retrieve($intentId);
+            } else {
+                $amountCreate = isset($data['amount']) ? (int) $data['amount'] : 0;
+                $paymentIntent = PaymentIntent::create([
+                    'amount' => $amountCreate,
+                    'currency' => 'eur',
+                    'automatic_payment_methods' => ['enabled' => true],
+                ]);
+            }
+
+            $paymentIntent->confirm();
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
+
+        $amountPaid = ($paymentIntent->amount ?? 0) / 100;
+        $currency = $paymentIntent->currency ?? 'eur';
+        $status = $paymentIntent->status ?? null;
+
         $reservation = new Reservation();
         if (isset($data['dateDebut'])) {
             $reservation->setDateDebut(new \DateTime($data['dateDebut']));
@@ -81,13 +110,34 @@ class ReservationController extends AbstractController
             }
         }
 
+        $reservation->setStripeAmount($amountPaid);
         $entityManager->persist($reservation);
+
+        $transaction = new Transaction();
+        $transaction->setStripeIntentId($paymentIntent->id);
+        $transaction->setAmount((string) $amountPaid);
+        $transaction->setCurrency($currency);
+        $transaction->setStatus($status);
+        $transaction->setReservation($reservation);
+        $transaction->setUtilisateur($reservation->getUtilisateur());
+
+        $owner = $reservation->getAnnonce()?->getUtilisateur();
+        if ($owner) {
+            $current = (float) ($owner->getCagnotte() ?? 0);
+            $owner->setCagnotte((string)($current + $amountPaid));
+            $entityManager->persist($owner);
+        }
+
+        $entityManager->persist($transaction);
         $entityManager->flush();
 
         return $this->json([
             'id' => $reservation->getId(),
             'annonceId' => $reservation->getAnnonce()?->getId(),
             'utilisateurId' => $reservation->getUtilisateur()?->getId(),
+            'stripeAmount' => $reservation->getStripeAmount(),
+            'paymentIntent' => $paymentIntent->id,
+            'status' => $status,
         ], 201);
     }
 
