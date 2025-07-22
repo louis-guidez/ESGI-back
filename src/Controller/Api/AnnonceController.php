@@ -206,6 +206,59 @@ class AnnonceController extends AbstractController
         ], 201);
     }
 
+    #[OA\Get(path: '/api/secure/utilisateurs/annonces', summary: 'Get all annonces by user')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[OA\Response(response: 404, description: 'User not found')]
+    #[Route('/api/utilisateurs/{id}/annonces', name: 'api_annonces_by_user', methods: ['GET'])]
+    public function annoncesByUser(
+        Security $security,
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $params
+    ): JsonResponse {
+        $user = $security->getUser();
+
+        if (!$user) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
+
+        $endpoint = rtrim($params->get('minio_endpoint'), '/');
+        $annonces = $user->getAnnonces();
+
+        $data = [];
+
+        foreach ($annonces as $annonce) {
+            $photos = [];
+            foreach ($annonce->getPhotos() as $photo) {
+                $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
+            }
+
+            $categories = [];
+            foreach ($annonce->getCategorie() as $categorie) {
+                $categories[] = $categorie->getLabel();
+            }
+
+            $data[] = [
+                'id' => $annonce->getId(),
+                'titre' => $annonce->getTitre(),
+                'description' => $annonce->getDescription(),
+                'categories' => $categories,
+                'prix' => $annonce->getPrix(),
+                'statut' => $annonce->getStatut(),
+                'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
+                'photos' => $photos,
+                'user' => [
+                    'id' => $annonce->getUtilisateur()->getId(),
+                    'prenom' => $annonce->getUtilisateur()->getPrenom(),
+                    'nom' => $annonce->getUtilisateur()->getNom(),
+                    'email' => $annonce->getUtilisateur()->getEmail(),
+                ],
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+
     #[OA\Put(path: '/api/secure/annonces/{id}', summary: 'Edit annonce')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
