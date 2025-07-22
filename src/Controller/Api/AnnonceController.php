@@ -209,7 +209,7 @@ class AnnonceController extends AbstractController
     #[OA\Get(path: '/api/secure/utilisateurs/annonces', summary: 'Get all annonces by user')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\Response(response: 404, description: 'User not found')]
-    #[Route('/api/utilisateurs/annonces', name: 'api_annonces_by_user', methods: ['GET'])]
+    #[Route('/api/secure/utilisateurs/annonces', name: 'api_annonces_by_user', methods: ['GET'])]
     public function annoncesByUser(
         Security $security,
         EntityManagerInterface $entityManager,
