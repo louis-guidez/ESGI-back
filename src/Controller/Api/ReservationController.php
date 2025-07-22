@@ -8,6 +8,7 @@ use App\Entity\Utilisateur;
 use App\Entity\Transaction;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -41,6 +42,31 @@ class ReservationController extends AbstractController
 
         return $this->json($data);
     }
+
+    #[OA\Get(path: '/api/secure/utilisateurs/reservations', summary: 'List reservations by user')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[Route('/api/secure/utilisateurs/reservations', name: 'api_reservations_by_user', methods: ['GET'])]
+    public function reservationsByUser(Security $security, ReservationRepository $reservationRepository): JsonResponse
+    {
+        $user = $security->getUser();
+        $reservations = $user->getReservations();
+
+        $data = [];
+        foreach ($reservations as $reservation) {
+            $data[] = [
+                'id' => $reservation->getId(),
+                'dateDebut' => $reservation->getDateDebut()?->format('Y-m-d H:i:s'),
+                'dateFin' => $reservation->getDateFin()?->format('Y-m-d H:i:s'),
+                'statut' => $reservation->getStatut(),
+                'annonceId' => $reservation->getAnnonce()?->getId(),
+                'utilisateurId' => $reservation->getUtilisateur()?->getId(),
+                'stripeAmount' => $reservation->getStripeAmount()
+            ];
+        }
+
+        return $this->json($data);
+    }
+
 
     #[OA\Post(path: '/api/secure/reservations', summary: 'Create reservation')]
     #[OA\Response(response: 201, description: 'Created')]
