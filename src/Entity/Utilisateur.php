@@ -206,9 +206,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return (float) $this->cagnotte;
     }
 
-    public function setCagnotte(float|string $cagnotte): static
+    public function setCagnotte(float|string|null $cagnotte): static
     {
-        $this->cagnotte = number_format((float) $cagnotte, 2, '.', '');
+        if ($cagnotte === null) {
+            $this->cagnotte = '0.00';
+        } else {
+            $this->cagnotte = number_format((float) $cagnotte, 2, '.', '');
+        }
         return $this;
     }
 
