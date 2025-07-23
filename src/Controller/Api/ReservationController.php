@@ -163,7 +163,24 @@ class ReservationController extends AbstractController
             return $this->json(['error' => 'Utilisateur not found'], 404);
         }
 
-        $amountCreate = (int) round((float) $annonce->getPrix() * 100);
+        try {
+            $dateDebut = new \DateTime($data['dateDebut']);
+            $dateFin = new \DateTime($data['dateFin']);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Invalid dates'], 400);
+        }
+
+        $interval = $dateDebut->diff($dateFin);
+        $numberOfDays = $interval->days;
+
+        if ($numberOfDays < 1) {
+            return $this->json(['error' => 'La durée minimale est d\'un jour'], 400);
+        }
+
+        $prixParJour = (float) $annonce->getPrix();
+        $totalPrix = $prixParJour * $numberOfDays;
+        $amountCreate = (int) round($totalPrix * 100);
+
         $paymentMethodId = $data['payment_method_id'] ?? null;
 
         if (!$paymentMethodId) {
@@ -195,8 +212,8 @@ class ReservationController extends AbstractController
         $reservation = new Reservation();
         $reservation->setAnnonce($annonce);
         $reservation->setUtilisateur($utilisateur);
-        $reservation->setDateDebut(new \DateTime($data['dateDebut']));
-        $reservation->setDateFin(new \DateTime($data['dateFin']));
+        $reservation->setDateDebut($dateDebut);
+        $reservation->setDateFin($dateFin);
         $reservation->setStatut('confirmée');
         $reservation->setStripeAmount($amountPaid);
         $entityManager->persist($reservation);
