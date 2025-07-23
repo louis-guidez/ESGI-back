@@ -73,24 +73,31 @@ class ReservationController extends AbstractController
     public function reservationsByUser(Security $security, ReservationRepository $reservationRepository,  ParameterBagInterface $params): JsonResponse
     {
         $user = $security->getUser();
-        $reservations = $user->getReservations();
-        $anonces = $reservations->getAnnonces();
+
+        if (!$user) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
 
         $endpoint = rtrim($params->get('minio_endpoint'), '/'); // évite les //
-        foreach ($anonces as $annonce) {
+        
+        $reservations = $user->getReservations();
+
+        $data = [];
+        foreach ($reservations as $reservation) {
+
+            $annonce = $reservation->getAnnonce();
+
+            $utilisateur = $annonce->getUtilisateur();
+
             $photos = [];
             foreach ($annonce->getPhotos() as $photo) {
                 $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
             }
-
             $categories = [];
             foreach ($annonce->getCategorie() as $categorie) {
                 $categories[] = $categorie->getLabel();
             }
-        }
 
-        $data = [];
-        foreach ($reservations as $reservation) {
             $data[] = [
                 'id' => $reservation->getId(),
                 'dateDebut' => $reservation->getDateDebut()?->format('Y-m-d H:i:s'),
@@ -99,22 +106,22 @@ class ReservationController extends AbstractController
                 'utilisateurId' => $reservation->getUtilisateur()?->getId(),
                 'stripeAmount' => $reservation->getStripeAmount(),
                 'annonce' => [
-                    'id' => $reservation->getAnnonce()->getId(),
-                    'titre' => $reservation->getAnnonce()->getTitre(),
-                    'description' => $reservation->getAnnonce()->getDescription(),
+                    'id' => $annonce->getId(),
+                    'titre' => $annonce->getTitre(),
+                    'description' => $annonce->getDescription(),
                     'categories' => $categories,
-                    'prix' => $reservation->getAnnonce()->getPrix(),
-                    'statut' => $reservation->getAnnonce()->getStatut(),
-                    'dateCreation' => $reservation->getAnnonce()->getDateCreation()?->format('Y-m-d H:i:s'),
+                    'prix' => $annonce->getPrix(),
+                    'statut' => $annonce->getStatut(),
+                    'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
                     'photos' => $photos,
                     'user' => [
-                        'id' => $reservation->getAnnonce()->getUtilisateur()->getId(),
-                        'prenom' => $reservation->getAnnonce()->getUtilisateur()->getPrenom(),
-                        'nom' => $reservation->getAnnonce()->getUtilisateur()->getNom(),
-                        'email' => $reservation->getAnnonce()->getUtilisateur()->getEmail(),
-                        'adresse' => $reservation->getAnnonce()->getUtilisateur()->getAdresse(),
-                        'postalCode' => $reservation->getAnnonce()->getUtilisateur()->getPostalCode(),
-                        'ville' => $reservation->getAnnonce()->getUtilisateur()->getVille(),
+                        'id' => $utilisateur->getId(),
+                        'prenom' => $utilisateur->getPrenom(),
+                        'nom' => $utilisateur->getNom(),
+                        'email' => $utilisateur->getEmail(),
+                        'adresse' => $utilisateur->getAdresse(),
+                        'postalCode' => $utilisateur->getPostalCode(),
+                        'ville' => $utilisateur->getVille(),
                     ],
                 ],
             ];
