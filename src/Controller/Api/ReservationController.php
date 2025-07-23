@@ -175,7 +175,6 @@ class ReservationController extends AbstractController
                 'amount' => $amountCreate,
                 'currency' => 'eur',
                 'payment_method' => $paymentMethodId,
-                'confirmation_method' => 'manual',
                 'confirm' => true,
                 'automatic_payment_methods' => [
                     'enabled' => true,
