@@ -30,7 +30,8 @@ class AnnonceController extends AbstractController
         if ($search) {
             $annonces = $annonceRepository->searchByTerm($search);
         } else {
-            $annonces = $annonceRepository->findAll();
+//            $annonces = $annonceRepository->findAll();
+            $annonces = $annonceRepository->findNonArchived();
         }
         $endpoint = rtrim($params->get('minio_endpoint'), '/'); // évite les //
 

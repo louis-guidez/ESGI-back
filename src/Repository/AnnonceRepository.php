@@ -28,11 +28,23 @@ class AnnonceRepository extends ServiceEntityRepository
             ->leftJoin('a.categorie', 'c')
             ->addSelect('c')
             ->andWhere('LOWER(a.titre) LIKE :t OR LOWER(a.description) LIKE :t OR LOWER(c.label) LIKE :t')
+            ->andWhere('a.statut != :statut')
+            ->setParameter('statut', 'archived')
             ->setParameter('t', '%' . strtolower($term) . '%')
             ->orderBy('a.id', 'DESC');
 
         return $qb->getQuery()->getResult();
     }
+
+    public function findNonArchived(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.statut != :statut')
+            ->setParameter('statut', 'archived')
+            ->getQuery()
+            ->getResult();
+    }
+
 
     //    /**
     //     * @return Annonce[] Returns an array of Annonce objects
