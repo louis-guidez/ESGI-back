@@ -339,14 +339,15 @@ class AnnonceController extends AbstractController
         return $this->json($dataUpdated);
     }
 
-    #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Delete annonce')]
+    #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Archive annonce')]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/secure/annonces/{id}', name: 'api_annonces_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {
-        $entityManager->remove($annonce);
+        // Marquer l'annonce comme archivée
+        $annonce->setStatut('archived');
         $entityManager->flush();
 
-        return $this->json(['status' => 'Annonce deleted']);
+        return $this->json(['status' => 'Annonce archivée']);
     }
 }
