@@ -167,7 +167,10 @@ class ReservationController extends AbstractController
                 $paymentIntent = PaymentIntent::create([
                     'amount' => $amountCreate,
                     'currency' => 'eur',
-                    'automatic_payment_methods' => ['enabled' => true],
+                    'automatic_payment_methods' => [
+                        'enabled' => true,
+                        'allow_redirects' => 'never',
+                    ],
                 ]);
             }
 
