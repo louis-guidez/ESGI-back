@@ -295,7 +295,9 @@ class ReservationController extends AbstractController
     #[Route('/api/secure/reservations/{id}', name: 'api_reservations_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Reservation $reservation): JsonResponse
     {
-        $entityManager->remove($reservation);
+
+        $reservation->setStatut('archived');
+        $entityManager->persist($reservation);
         $entityManager->flush();
 
         return $this->json(['status' => 'Reservation deleted']);
