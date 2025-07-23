@@ -43,6 +43,29 @@ class ReservationController extends AbstractController
         return $this->json($data);
     }
 
+    #[OA\Get(path: '/api/reservations/annonce/{id}', summary: 'List reservations by annonce')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[Route('/api/reservations/annonce/{id}', name: 'api_reservations_by_annonce', methods: ['GET'])]
+    public function reservationsByAnnonce(Annonce $annonce, ReservationRepository $reservationRepository): JsonResponse
+    {
+        $reservations = $reservationRepository->findByAnnonce($annonce);
+
+        $data = [];
+        foreach ($reservations as $reservation) {
+            $data[] = [
+                'id' => $reservation->getId(),
+                'dateDebut' => $reservation->getDateDebut()?->format('Y-m-d H:i:s'),
+                'dateFin' => $reservation->getDateFin()?->format('Y-m-d H:i:s'),
+                'statut' => $reservation->getStatut(),
+                'annonceId' => $reservation->getAnnonce()?->getId(),
+                'utilisateurId' => $reservation->getUtilisateur()?->getId(),
+                'stripeAmount' => $reservation->getStripeAmount(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
     #[OA\Get(path: '/api/secure/utilisateurs/reservations', summary: 'List reservations by user')]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/secure/utilisateurs/reservations', name: 'api_reservations_by_user', methods: ['GET'])]
