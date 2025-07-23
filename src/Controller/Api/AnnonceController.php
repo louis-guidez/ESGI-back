@@ -30,7 +30,8 @@ class AnnonceController extends AbstractController
         if ($search) {
             $annonces = $annonceRepository->searchByTerm($search);
         } else {
-            $annonces = $annonceRepository->findAll();
+//            $annonces = $annonceRepository->findAll();
+            $annonces = $annonceRepository->findNonArchived();
         }
         $endpoint = rtrim($params->get('minio_endpoint'), '/'); // évite les //
 
@@ -108,6 +109,8 @@ class AnnonceController extends AbstractController
                 'prenom' => $annonce->getUtilisateur()->getPrenom(),
                 'nom' => $annonce->getUtilisateur()->getNom(),
                 'email' => $annonce->getUtilisateur()->getEmail(),
+                'ville' => $annonce->getUtilisateur()->getVille(),
+                'postalCode' => $annonce->getUtilisateur()->getPostalCode(),
             ],
         ];
 
@@ -206,6 +209,59 @@ class AnnonceController extends AbstractController
         ], 201);
     }
 
+    #[OA\Get(path: '/api/secure/utilisateurs/annonces', summary: 'Get all annonces by user')]
+    #[OA\Response(response: 200, description: 'Success')]
+    #[OA\Response(response: 404, description: 'User not found')]
+    #[Route('/api/secure/utilisateurs/annonces', name: 'api_annonces_by_user', methods: ['GET'])]
+    public function annoncesByUser(
+        Security $security,
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $params
+    ): JsonResponse {
+        $user = $security->getUser();
+
+        if (!$user) {
+            return $this->json(['error' => 'User not found'], 404);
+        }
+
+        $endpoint = rtrim($params->get('minio_endpoint'), '/');
+        $annonces = $user->getAnnonces();
+
+        $data = [];
+
+        foreach ($annonces as $annonce) {
+            $photos = [];
+            foreach ($annonce->getPhotos() as $photo) {
+                $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
+            }
+
+            $categories = [];
+            foreach ($annonce->getCategorie() as $categorie) {
+                $categories[] = $categorie->getLabel();
+            }
+
+            $data[] = [
+                'id' => $annonce->getId(),
+                'titre' => $annonce->getTitre(),
+                'description' => $annonce->getDescription(),
+                'categories' => $categories,
+                'prix' => $annonce->getPrix(),
+                'statut' => $annonce->getStatut(),
+                'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
+                'photos' => $photos,
+                'user' => [
+                    'id' => $annonce->getUtilisateur()->getId(),
+                    'prenom' => $annonce->getUtilisateur()->getPrenom(),
+                    'nom' => $annonce->getUtilisateur()->getNom(),
+                    'email' => $annonce->getUtilisateur()->getEmail(),
+                ],
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+
     #[OA\Put(path: '/api/secure/annonces/{id}', summary: 'Edit annonce')]
     #[OA\Response(response: 200, description: 'Success')]
     #[OA\RequestBody(
@@ -227,6 +283,8 @@ class AnnonceController extends AbstractController
     public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce, Security $security): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+        if(isset($data))
 
         $annonce->setTitre($data['titre'] ?? $annonce->getTitre());
         $annonce->setDescription($data['description'] ?? $annonce->getDescription());
@@ -257,7 +315,28 @@ class AnnonceController extends AbstractController
 
         $entityManager->flush();
 
-        return $this->json(['status' => 'Annonce updated']);
+        $categoriesUpdated = [];
+        foreach ($annonce->getCategorie() as $categorie) {
+            $categoriesUpdated[] = $categorie->getLabel();
+        }
+
+        $dataUpdated[] = [
+            'id' => $annonce->getId(),
+            'titre' => $annonce->getTitre(),
+            'description' => $annonce->getDescription(),
+            'categories' => $categoriesUpdated,
+            'prix' => $annonce->getPrix(),
+            'statut' => $annonce->getStatut(),
+            'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
+            'user' => [
+                'id' => $annonce->getUtilisateur()->getId(),
+                'prenom' => $annonce->getUtilisateur()->getPrenom(),
+                'nom' => $annonce->getUtilisateur()->getNom(),
+                'email' => $annonce->getUtilisateur()->getEmail(),
+            ],
+        ];
+
+        return $this->json($dataUpdated);
     }
 
     #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Delete annonce')]

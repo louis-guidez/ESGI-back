@@ -133,43 +133,22 @@ class UtilisateurController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['email'])) {
-            $utilisateur->setEmail($data['email']);
-        }
-        if (isset($data['roles'])) {
-            $utilisateur->setRoles($data['roles']);
-        }
-        if (isset($data['password'])) {
-            $utilisateur->setPassword($data['password']);
-        }
-        if (array_key_exists('nom', $data)) {
-            $utilisateur->setNom($data['nom']);
-        }
-        if (array_key_exists('prenom', $data)) {
-            $utilisateur->setPrenom($data['prenom']);
-        }
-        if (isset($data['dateInscription'])) {
-            $utilisateur->setDateInscription(new \DateTime($data['dateInscription']));
-        }
-        if (array_key_exists('cagnotte', $data)) {
-            $utilisateur->setCagnotte($data['cagnotte']);
-        }
-        if (array_key_exists('emailIsVerified', $data)) {
-            $utilisateur->setEmailIsVerified($data['emailIsVerified']);
-        }
-        if (array_key_exists('adresse', $data)) {
-            $utilisateur->setAdresse($data['adresse']);
-        }
-        if (array_key_exists('postalCode', $data)) {
-            $utilisateur->setPostalCode($data['postalCode']);
-        }
-        if (array_key_exists('ville', $data)) {
-            $utilisateur->setVille($data['ville']);
-        }
-        if (array_key_exists('pays', $data)) {
-            $utilisateur->setPays($data['pays']);
-        }
+        $utilisateur->setEmail($data['email'] ?? '');
+        $utilisateur->setRoles($data['roles'] ?? []);
+        $utilisateur->setPassword($data['password'] ?? '');
+        $utilisateur->setNom($data['nom'] ?? null);
+        $utilisateur->setPrenom($data['prenom'] ?? null);
+//        if (isset($data['dateInscription'])) {
+//            $utilisateur->setDateInscription(new \DateTime($data['dateInscription']));
+//        }
+        $utilisateur->setCagnotte($data['cagnotte'] ?? null);
+        $utilisateur->setEmailIsVerified($data['emailIsVerified'] ?? null);
+        $utilisateur->setAdresse($data['adresse'] ?? null);
+        $utilisateur->setPostalCode($data['postalCode'] ?? null);
+        $utilisateur->setVille($data['ville'] ?? null);
+        $utilisateur->setPays($data['pays'] ?? null);
 
+        $entityManager->persist($utilisateur);
         $entityManager->flush();
 
         $dataUser[] = [
@@ -187,7 +166,7 @@ class UtilisateurController extends AbstractController
             'pays' => $utilisateur->getPays(),
         ];
 
-        return $this->json($dataUser);
+        return $this->json($dataUser, 201);
     }
 
     #[OA\Delete(path: '/api/secure/utilisateurs/{id}', summary: 'Delete utilisateur')]
