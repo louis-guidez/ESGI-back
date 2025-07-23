@@ -109,6 +109,8 @@ class AnnonceController extends AbstractController
                 'prenom' => $annonce->getUtilisateur()->getPrenom(),
                 'nom' => $annonce->getUtilisateur()->getNom(),
                 'email' => $annonce->getUtilisateur()->getEmail(),
+                'ville' => $annonce->getUtilisateur()->getVille(),
+                'postalCode' => $annonce->getUtilisateur()->getPostalCode(),
             ],
         ];
 
@@ -281,6 +283,8 @@ class AnnonceController extends AbstractController
     public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce, Security $security): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+        if(isset($data))
 
         $annonce->setTitre($data['titre'] ?? $annonce->getTitre());
         $annonce->setDescription($data['description'] ?? $annonce->getDescription());
