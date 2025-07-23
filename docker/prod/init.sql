@@ -139,7 +139,7 @@ CREATE TABLE `utilisateur` (
                                `nom` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                `prenom` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                `date_inscription` datetime DEFAULT NULL,
-                               `cagnotte` decimal(10,2) DEFAULT NULL,
+                               `cagnotte` decimal(10,2) NOT NULL DEFAULT 0.00,
                                `email_is_verified` tinyint(1) DEFAULT NULL,
                                `adresse` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
                                `postal_code` int DEFAULT NULL,
