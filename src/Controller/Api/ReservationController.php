@@ -177,6 +177,10 @@ class ReservationController extends AbstractController
                 'payment_method' => $paymentMethodId,
                 'confirmation_method' => 'manual',
                 'confirm' => true,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                    'allow_redirects' => 'never',
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->json(['error' => $e->getMessage()], 500);
