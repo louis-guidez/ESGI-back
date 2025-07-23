@@ -9,6 +9,7 @@ use App\Entity\Transaction;
 use App\Repository\ReservationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
@@ -69,10 +70,24 @@ class ReservationController extends AbstractController
     #[OA\Get(path: '/api/secure/utilisateurs/reservations', summary: 'List reservations by user')]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/secure/utilisateurs/reservations', name: 'api_reservations_by_user', methods: ['GET'])]
-    public function reservationsByUser(Security $security, ReservationRepository $reservationRepository): JsonResponse
+    public function reservationsByUser(Security $security, ReservationRepository $reservationRepository,  ParameterBagInterface $params): JsonResponse
     {
         $user = $security->getUser();
         $reservations = $user->getReservations();
+        $anonces = $reservations->getAnnonces();
+
+        $endpoint = rtrim($params->get('minio_endpoint'), '/'); // évite les //
+        foreach ($anonces as $annonce) {
+            $photos = [];
+            foreach ($annonce->getPhotos() as $photo) {
+                $photos[] = $endpoint . '/fichier/' . $photo->getImageName();
+            }
+
+            $categories = [];
+            foreach ($annonce->getCategorie() as $categorie) {
+                $categories[] = $categorie->getLabel();
+            }
+        }
 
         $data = [];
         foreach ($reservations as $reservation) {
@@ -81,9 +96,27 @@ class ReservationController extends AbstractController
                 'dateDebut' => $reservation->getDateDebut()?->format('Y-m-d H:i:s'),
                 'dateFin' => $reservation->getDateFin()?->format('Y-m-d H:i:s'),
                 'statut' => $reservation->getStatut(),
-                'annonceId' => $reservation->getAnnonce()?->getId(),
                 'utilisateurId' => $reservation->getUtilisateur()?->getId(),
-                'stripeAmount' => $reservation->getStripeAmount()
+                'stripeAmount' => $reservation->getStripeAmount(),
+                'annonce' => [
+                    'id' => $reservation->getAnnonce()->getId(),
+                    'titre' => $reservation->getAnnonce()->getTitre(),
+                    'description' => $reservation->getAnnonce()->getDescription(),
+                    'categories' => $categories,
+                    'prix' => $reservation->getAnnonce()->getPrix(),
+                    'statut' => $reservation->getAnnonce()->getStatut(),
+                    'dateCreation' => $reservation->getAnnonce()->getDateCreation()?->format('Y-m-d H:i:s'),
+                    'photos' => $photos,
+                    'user' => [
+                        'id' => $reservation->getAnnonce()->getUtilisateur()->getId(),
+                        'prenom' => $reservation->getAnnonce()->getUtilisateur()->getPrenom(),
+                        'nom' => $reservation->getAnnonce()->getUtilisateur()->getNom(),
+                        'email' => $reservation->getAnnonce()->getUtilisateur()->getEmail(),
+                        'adresse' => $reservation->getAnnonce()->getUtilisateur()->getAdresse(),
+                        'postalCode' => $reservation->getAnnonce()->getUtilisateur()->getPostalCode(),
+                        'ville' => $reservation->getAnnonce()->getUtilisateur()->getVille(),
+                    ],
+                ],
             ];
         }
 
