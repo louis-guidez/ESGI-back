@@ -47,7 +47,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTime $dateInscription = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
-    private ?string $cagnotte = null;
+    private ?string $cagnotte = '0.00';
 
     #[ORM\Column(nullable: true)]
     private ?bool $emailIsVerified = null;
@@ -201,15 +201,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getCagnotte(): ?string
+    public function getCagnotte(): float
     {
-        return $this->cagnotte;
+        return (float) $this->cagnotte;
     }
 
-    public function setCagnotte(?string $cagnotte): static
+    public function setCagnotte(float|string $cagnotte): static
     {
-        $this->cagnotte = $cagnotte;
-
+        $this->cagnotte = number_format((float) $cagnotte, 2, '.', '');
         return $this;
     }
 
