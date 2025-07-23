@@ -311,7 +311,28 @@ class AnnonceController extends AbstractController
 
         $entityManager->flush();
 
-        return $this->json(['status' => 'Annonce updated']);
+        $categoriesUpdated = [];
+        foreach ($annonce->getCategorie() as $categorie) {
+            $categoriesUpdated[] = $categorie->getLabel();
+        }
+
+        $dataUpdated[] = [
+            'id' => $annonce->getId(),
+            'titre' => $annonce->getTitre(),
+            'description' => $annonce->getDescription(),
+            'categories' => $categoriesUpdated,
+            'prix' => $annonce->getPrix(),
+            'statut' => $annonce->getStatut(),
+            'dateCreation' => $annonce->getDateCreation()?->format('Y-m-d H:i:s'),
+            'user' => [
+                'id' => $annonce->getUtilisateur()->getId(),
+                'prenom' => $annonce->getUtilisateur()->getPrenom(),
+                'nom' => $annonce->getUtilisateur()->getNom(),
+                'email' => $annonce->getUtilisateur()->getEmail(),
+            ],
+        ];
+
+        return $this->json($dataUpdated);
     }
 
     #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Delete annonce')]
