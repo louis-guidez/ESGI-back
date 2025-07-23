@@ -280,11 +280,13 @@ class AnnonceController extends AbstractController
         )
     )]
     #[Route('/api/secure/annonces/{id}', name: 'api_annonces_edit', methods: ['PUT'])]
-    public function edit(Request $request, EntityManagerInterface $entityManager, Annonce $annonce, Security $security): JsonResponse
-    {
+    public function edit(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        Annonce $annonce,
+        Security $security
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-
-        if(isset($data))
 
         $annonce->setTitre($data['titre'] ?? $annonce->getTitre());
         $annonce->setDescription($data['description'] ?? $annonce->getDescription());
@@ -320,7 +322,7 @@ class AnnonceController extends AbstractController
             $categoriesUpdated[] = $categorie->getLabel();
         }
 
-        $dataUpdated[] = [
+        $dataUpdated = [
             'id' => $annonce->getId(),
             'titre' => $annonce->getTitre(),
             'description' => $annonce->getDescription(),
@@ -339,15 +341,15 @@ class AnnonceController extends AbstractController
         return $this->json($dataUpdated);
     }
 
-    #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Archive annonce')]
+    #[OA\Delete(path: '/api/secure/annonces/{id}', summary: 'Delete annonce')]
     #[OA\Response(response: 200, description: 'Success')]
     #[Route('/api/secure/annonces/{id}', name: 'api_annonces_delete', methods: ['DELETE'])]
     public function delete(EntityManagerInterface $entityManager, Annonce $annonce): JsonResponse
     {
-        // Marquer l'annonce comme archivée
         $annonce->setStatut('archived');
+        $entityManager->persist($annonce);
         $entityManager->flush();
 
-        return $this->json(['status' => 'Annonce archivée']);
+        return $this->json(['status' => 'Annonce Archived']);
     }
 }
