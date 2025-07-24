@@ -135,7 +135,6 @@ class UtilisateurController extends AbstractController
 
         $utilisateur->setEmail($data['email'] ?? '');
         $utilisateur->setRoles($data['roles'] ?? []);
-        $utilisateur->setPassword($data['password'] ?? '');
         $utilisateur->setNom($data['nom'] ?? null);
         $utilisateur->setPrenom($data['prenom'] ?? null);
 //        if (isset($data['dateInscription'])) {
